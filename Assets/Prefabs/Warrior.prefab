@@ -113,18 +113,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5731cb05dd488fd46924c279c233c4c8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  <health>k__BackingField: 100
-  <mana>k__BackingField: 20
-  <attack>k__BackingField: 50
+  <name>k__BackingField: Warrior
+  <maxHealth>k__BackingField: 100
+  <maxMana>k__BackingField: 20
+  <attack>k__BackingField: 40
   <armor>k__BackingField: 30
   <speed>k__BackingField: 20
   <evasion>k__BackingField: 5
   <description>k__BackingField: A brave and experienced fighter wielding sword and
     shield.
   <attacks>k__BackingField:
-  - Attack
-  - Slash
-  - Defend+
+  - {fileID: 2227228746978803984, guid: febdf0276d6a9f14b9a62743ce00def9, type: 3}
+  - {fileID: 2860974637167007785, guid: fcad26d9b2564f548a211bfbcc721a44, type: 3}
+  myTurn: 0
 --- !u!1001 &2481480137755824949
 PrefabInstance:
   m_ObjectHideFlags: 0

@@ -114,17 +114,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1507bca9b0282d247b1348a19adb9b8c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  <health>k__BackingField: 70
-  <mana>k__BackingField: 40
+  <name>k__BackingField: Archer
+  <maxHealth>k__BackingField: 70
+  <maxMana>k__BackingField: 30
   <attack>k__BackingField: 40
   <armor>k__BackingField: 10
   <speed>k__BackingField: 25
   <evasion>k__BackingField: 15
   <description>k__BackingField: The hawk eye, whose arrow is infallible.
   <attacks>k__BackingField:
-  - Attack
-  - PiercingShot
-  - Dodge
+  - {fileID: 1701149966952092727, guid: 76f475f694ba1b44194aa38335e0c717, type: 3}
+  - {fileID: 8014565029434378969, guid: d63acdf16ad376e44a780eb22cb39393, type: 3}
+  myTurn: 0
 --- !u!1001 &227469482858890103
 PrefabInstance:
   m_ObjectHideFlags: 0

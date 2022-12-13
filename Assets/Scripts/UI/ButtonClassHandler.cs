@@ -23,15 +23,15 @@ public class ButtonClassHandler : MonoBehaviour
     public void ShowDescription()
     {
         classDescription.text = classInfo.description;
-        classStats.text = "Health: " + classInfo.health + "\n" + "Mana: " + classInfo.mana + "\n" + "Attack: " + classInfo.attack + "\n" + "Armor: " + classInfo.armor + "\n" + "Speed: " + classInfo.speed + "\n" + "Evasion: " + classInfo.evasion;
+        classStats.text = "Health: " + classInfo.maxHealth + "\n" + "Mana: " + classInfo.maxMana + "\n" + "Attack: " + classInfo.attack + "\n" + "Armor: " + classInfo.armor + "\n" + "Speed: " + classInfo.speed + "\n" + "Evasion: " + classInfo.evasion;
         classAttacks.text = "";
         for (int i = 0; i < classInfo.attacks.Count; i++)
         {
             if(classAttacks.text == "")
             {
-                classAttacks.text += classInfo.attacks[i];
+                classAttacks.text += classInfo.attacks[i].attackName;
             }
-            else  classAttacks.text += "\n" + classInfo.attacks[i];
+            else  classAttacks.text += "\n" + classInfo.attacks[i].attackName;
         }
     }
 
@@ -40,15 +40,15 @@ public class ButtonClassHandler : MonoBehaviour
         if (unitSelection.selectedUnit != null)
         {
             classDescription.text = unitSelection.selectedUnit.GetComponent<BaseClass>().description;
-            classStats.text = "Health: " + classInfo.health + "\n" + "Mana: " + classInfo.mana + "\n" + "Attack: " + classInfo.attack + "\n" + "Armor: " + classInfo.armor + "\n" + "Speed: " + classInfo.speed + "\n" + "Evasion: " + classInfo.evasion;
+            classStats.text = "Health: " + classInfo.maxHealth + "\n" + "Mana: " + classInfo.maxMana + "\n" + "Attack: " + classInfo.attack + "\n" + "Armor: " + classInfo.armor + "\n" + "Speed: " + classInfo.speed + "\n" + "Evasion: " + classInfo.evasion;
             classAttacks.text = "";
             for (int i = 0; i < classInfo.attacks.Count; i++)
             {
                 if (classAttacks.text == "")
                 {
-                    classAttacks.text += classInfo.attacks[i];
+                    classAttacks.text += classInfo.attacks[i].attackName;
                 }
-                else classAttacks.text += "\n" + classInfo.attacks[i];
+                else classAttacks.text += "\n" + classInfo.attacks[i].attackName;
             }
         }
         else

@@ -113,8 +113,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 22eb77c495c8cd0459e38903d9ccaee7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  <health>k__BackingField: 60
-  <mana>k__BackingField: 30
+  <name>k__BackingField: Assassin
+  <maxHealth>k__BackingField: 60
+  <maxMana>k__BackingField: 30
   <attack>k__BackingField: 50
   <armor>k__BackingField: 10
   <speed>k__BackingField: 30
@@ -122,9 +123,9 @@ MonoBehaviour:
   <description>k__BackingField: A reaper living in the shadows, bringing deaths to
     the enemy lines.
   <attacks>k__BackingField:
-  - Attack
-  - Haste
-  - BackAttack
+  - {fileID: 4934856321295563870, guid: 85411ac4f4bad6f449f198a574303fcb, type: 3}
+  - {fileID: 6792342235718188874, guid: 4009c110ef5e85542b443d06dce9f650, type: 3}
+  myTurn: 0
 --- !u!1001 &642004265706278615
 PrefabInstance:
   m_ObjectHideFlags: 0

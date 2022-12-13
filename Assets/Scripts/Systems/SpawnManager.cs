@@ -16,10 +16,13 @@ public class SpawnManager : MonoBehaviour
     private Vector3 pos6 = new Vector3(11, 1.5f, 7);
     private Vector3[] spawnPositions = new Vector3[6];
     private int i = 0;
-    private List<GameObject> units = new List<GameObject>();
+    public List<GameObject> units = new List<GameObject>();
 
     [SerializeField] private TextMeshProUGUI sideText;
     [SerializeField] private Button battleButton;
+
+    public List<GameObject> playerTeam = new List<GameObject>();
+    public List<GameObject> enemyTeam = new List<GameObject>();
 
     private void Awake()
     {
@@ -35,16 +38,16 @@ public class SpawnManager : MonoBehaviour
         spawnPositions[4] = pos5;
         spawnPositions[5] = pos6;
 
-        sideText.text = "<- Left Side";
+        sideText.text = "<- Your Team";
     }
 
     private void Update()
     {
         if(units.Count > 2)
         {
-            sideText.text = "Right Side ->";
+            sideText.text = "Enemy Team ->";
         }
-        else sideText.text = "<- Left Side";
+        else sideText.text = "<- Your Team";
 
         if(units.Count == 6) battleButton.interactable = true;
         else battleButton.interactable = false;
@@ -57,11 +60,15 @@ public class SpawnManager : MonoBehaviour
             if (units.Count > 2)
             {
                 units.Add(Instantiate(unit, spawnPositions[i], unit.transform.rotation * Quaternion.Euler(0, 180, 0)));
+                units[i].tag = "Enemy";
+                units[i].AddComponent<EnemyStateMachine>();
                 i++;
             }
             else
             {
                 units.Add(Instantiate(unit, spawnPositions[i], unit.transform.rotation));
+                units[i].tag = "Player";
+                units[i].AddComponent<PlayerStateMachine>();
                 i++;
             }
         }

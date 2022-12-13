@@ -112,8 +112,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1292539f48bfd5043aa176d570cdf48d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  <health>k__BackingField: 50
-  <mana>k__BackingField: 80
+  <name>k__BackingField: Mage
+  <maxHealth>k__BackingField: 50
+  <maxMana>k__BackingField: 80
   <attack>k__BackingField: 70
   <armor>k__BackingField: 10
   <speed>k__BackingField: 20
@@ -121,9 +122,10 @@ MonoBehaviour:
   <description>k__BackingField: Spellcaster whose power derives from supernatural
     forces.
   <attacks>k__BackingField:
-  - Attack
-  - Fireball
-  - Defend
+  - {fileID: 8014565029434378969, guid: d63acdf16ad376e44a780eb22cb39393, type: 3}
+  - {fileID: 2860974637167007785, guid: fcad26d9b2564f548a211bfbcc721a44, type: 3}
+  - {fileID: 6792342235718188874, guid: 4009c110ef5e85542b443d06dce9f650, type: 3}
+  myTurn: 0
 --- !u!1001 &1873487491774501713
 PrefabInstance:
   m_ObjectHideFlags: 0
