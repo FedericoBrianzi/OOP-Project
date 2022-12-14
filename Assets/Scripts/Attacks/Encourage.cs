@@ -13,10 +13,10 @@ public class Encourage : BaseAttack
         statNerfQuantity = 0;
 
         ignoreArmor = false;
-        defendPose = false;
 
         numberOfTargets = typeOfTarget.SingleAllyTarget;
         buffedStat = modifiedStat.Attack;
         nerfedStat = modifiedStat.NONE;
+        attackType = typeOfAttack.StatChange;
     }
 }

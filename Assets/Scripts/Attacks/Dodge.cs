@@ -13,10 +13,10 @@ public class Dodge : BaseAttack
         statNerfQuantity = 0;
 
         ignoreArmor = false;
-        defendPose = false;
 
         numberOfTargets = typeOfTarget.Self;
         buffedStat = modifiedStat.Evasion;
         nerfedStat = modifiedStat.NONE;
+        attackType = typeOfAttack.StatChange;
     }
 }

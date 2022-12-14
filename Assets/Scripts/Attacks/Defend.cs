@@ -2,21 +2,21 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Slash : BaseAttack
+public class Defend : BaseAttack
 {
-    public Slash()
+    public Defend()
     {
-        attackName = "Slash";
-        attackDamage = 10;
-        attackManaCost = 5;
+        attackName = "Defend";
+        attackDamage = 0;
+        attackManaCost = 0;
         statBuffQuantity = 0;
         statNerfQuantity = 0;
 
         ignoreArmor = false;
 
-        numberOfTargets = typeOfTarget.SingleEnemyTarget;
+        numberOfTargets = typeOfTarget.Self;
         buffedStat = modifiedStat.NONE;
         nerfedStat = modifiedStat.NONE;
-        attackType = typeOfAttack.Damage;
+        attackType = typeOfAttack.Defend;
     }
 }

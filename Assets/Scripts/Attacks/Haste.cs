@@ -13,10 +13,10 @@ public class Haste : BaseAttack
         statNerfQuantity = 0;
 
         ignoreArmor = false;
-        defendPose = false;
 
         numberOfTargets = typeOfTarget.SingleAllyTarget;
         buffedStat = modifiedStat.Speed;
         nerfedStat = modifiedStat.NONE;
+        attackType = typeOfAttack.StatChange;
     }
 }

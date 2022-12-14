@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class BackAttack : BaseAttack
 {
-    public BackAttack()
+    public BackAttack() 
     {
         attackName = "Back Attack";
         attackDamage = 20;
@@ -13,10 +13,10 @@ public class BackAttack : BaseAttack
         statNerfQuantity = 10;
 
         ignoreArmor = true;
-        defendPose = false;
 
         numberOfTargets = typeOfTarget.SingleEnemyTarget;
         buffedStat = modifiedStat.NONE;
         nerfedStat = modifiedStat.Armor;
+        attackType = typeOfAttack.DmgAndStatChange;
     }
 }

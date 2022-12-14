@@ -50,52 +50,52 @@ public class EnemyStateMachine : MonoBehaviour
 
     private void ChooseAction()
     {
-        HandleTurn myAttack = new HandleTurn();
-        myAttack.attackerName = myClass.name;
-        myAttack.attackerGO = this.gameObject;
-        myAttack.attack = myClass.attacks[Random.Range(0, myClass.attacks.Count)];
-        SelectTarget(myAttack, myAttack.attack);
+        HandleTurn myAction = new HandleTurn();
+        myAction.attackerName = myClass.name;
+        myAction.attackerGO = this.gameObject;
+        myAction.attack = myClass.attacks[Random.Range(0, myClass.attacks.Count)];
+        SelectTarget(myAction, myAction.attack);
     }
 
-    private void SelectTarget(HandleTurn myAttack, BaseAttack attack)
+    private void SelectTarget(HandleTurn myAction, BaseAttack attack)
     {
         switch (attack.numberOfTargets)
         {
             case BaseAttack.typeOfTarget.SingleEnemyTarget:
-                myAttack.attackTargets.Add(BSM.playerTeam[UnityEngine.Random.Range(0, BSM.playerTeam.Count)]);
+                myAction.attackTargets.Add(BSM.playerTeam[Random.Range(0, BSM.playerTeam.Count)]);
                 break;
 
             case BaseAttack.typeOfTarget.MultiEnemyTargets:
-                SetMultiEnemyTargets(myAttack);
+                SetMultiEnemyTargets(myAction);
                 break;
 
             case BaseAttack.typeOfTarget.AllEnemyTargets:
-                myAttack.attackTargets.AddRange(BSM.playerTeam);
+                myAction.attackTargets.AddRange(BSM.playerTeam);
                 break;
 
             case BaseAttack.typeOfTarget.SingleAllyTarget:
-                myAttack.attackTargets.Add(BSM.enemyTeam[UnityEngine.Random.Range(0, BSM.enemyTeam.Count)]);
+                myAction.attackTargets.Add(BSM.enemyTeam[Random.Range(0, BSM.enemyTeam.Count)]);
                 break;
 
             case BaseAttack.typeOfTarget.MultiAllyTargets:
-                SetMultiAllyTargets(myAttack);
+                SetMultiAllyTargets(myAction);
                 break;
 
             case BaseAttack.typeOfTarget.AllAllyTargets:
-                myAttack.attackTargets.AddRange(BSM.enemyTeam);
+                myAction.attackTargets.AddRange(BSM.enemyTeam);
                 break;
 
             case BaseAttack.typeOfTarget.Self:
-                myAttack.attackTargets.Add(gameObject);
+                myAction.attackTargets.Add(gameObject);
                 break;
         }
-        BSM.SetNewActionToPerform(myAttack);
+        BSM.SetNewActionToPerform(myAction);
         currentState = TurnState.WAITING;
     }
 
     private void SetMultiAllyTargets(HandleTurn myAttack)
     {
-        if (UnityEngine.Random.Range(0, BSM.enemyTeam.Count) == 0)
+        if (Random.Range(0, BSM.enemyTeam.Count) == 0)
         {
             myAttack.attackTargets.Add(BSM.enemyTeam[0]);
             if (BSM.enemyTeam.Count >= 2)
@@ -103,7 +103,7 @@ public class EnemyStateMachine : MonoBehaviour
                 myAttack.attackTargets.Add(BSM.enemyTeam[1]);
             }
         }
-        else if (UnityEngine.Random.Range(0, BSM.enemyTeam.Count) == BSM.enemyTeam.Count - 1)
+        else if (Random.Range(0, BSM.enemyTeam.Count) == BSM.enemyTeam.Count - 1)
         {
             myAttack.attackTargets.Add(BSM.enemyTeam[BSM.enemyTeam.Count - 1]);
             if (BSM.enemyTeam.Count >= 2)
@@ -121,7 +121,7 @@ public class EnemyStateMachine : MonoBehaviour
 
     private void SetMultiEnemyTargets(HandleTurn myAttack)
     {
-        if (UnityEngine.Random.Range(0, BSM.playerTeam.Count) == 0)
+        if (Random.Range(0, BSM.playerTeam.Count) == 0)
         {
             myAttack.attackTargets.Add(BSM.playerTeam[0]);
             if (BSM.playerTeam.Count >= 2)
@@ -129,7 +129,7 @@ public class EnemyStateMachine : MonoBehaviour
                 myAttack.attackTargets.Add(BSM.playerTeam[1]);
             }
         }
-        else if (UnityEngine.Random.Range(0, BSM.playerTeam.Count) == BSM.playerTeam.Count - 1)
+        else if (Random.Range(0, BSM.playerTeam.Count) == BSM.playerTeam.Count - 1)
         {
             myAttack.attackTargets.Add(BSM.enemyTeam[BSM.enemyTeam.Count - 1]);
             if (BSM.playerTeam.Count >= 2) //non servirebbe perche se ci fosse solo un nemico entreresti sempre nel primo if

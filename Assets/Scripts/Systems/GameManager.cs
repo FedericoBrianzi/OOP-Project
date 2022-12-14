@@ -32,7 +32,7 @@ public class GameManager : MonoBehaviour
         {
             case GameState.PickTeams:
                 break;
-            case GameState.BattleStart:
+            case GameState.BattleStart: //puo essere probabilmente tolto
                 HandleBattleStart();
                 break;
             case GameState.PlayerTurn:

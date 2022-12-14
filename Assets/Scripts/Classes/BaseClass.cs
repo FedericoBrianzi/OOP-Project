@@ -36,6 +36,26 @@ public abstract class BaseClass : MonoBehaviour
         currentEvasion = evasion;
     }
 
+    public virtual void EvaluateAttack(BaseAttack attack, int totalDamage)
+    {
+        switch (attack.attackType)
+        {
+            case BaseAttack.typeOfAttack.Damage:
+                TakeDamage(totalDamage, attack.ignoreArmor);
+                break;
+            case BaseAttack.typeOfAttack.Defend:
+                isDefending = true; //vorrei che chi si difende fosse sempre il primo a eseguire l'azione
+                break;
+            case BaseAttack.typeOfAttack.StatChange:
+                ChangeStat(attack.buffedStat, attack.nerfedStat, attack.statBuffQuantity, attack.statNerfQuantity);
+                break;
+            case BaseAttack.typeOfAttack.DmgAndStatChange:
+                TakeDamage(totalDamage, attack.ignoreArmor);
+                ChangeStat(attack.buffedStat, attack.nerfedStat, attack.statBuffQuantity, attack.statNerfQuantity);
+                break;
+        }
+    }
+
     public virtual void TakeDamage(int damage, bool ignoreArmor)
     {
         if(Random.Range(0, 100) < currentEvasion)
@@ -56,17 +76,53 @@ public abstract class BaseClass : MonoBehaviour
         }
     }
 
-    public virtual void EvaluateAttack(BaseAttack attack)
+    public virtual void ChangeStat(BaseAttack.modifiedStat statToBuff, BaseAttack.modifiedStat statToNerf, int buff, int nerf)
     {
-        switch (attack.attackType)
+        switch (statToBuff)
         {
-            case BaseAttack.typeOfAttack.Damage:
-                TakeDamage(attack.attackDamage, attack.ignoreArmor);
+            case BaseAttack.modifiedStat.Health:
+                currentHealth += buff;
                 break;
-            case BaseAttack.typeOfAttack.Defend:
-                isDefending = true; //vorrei che chi si difende fosse sempre il primo a eseguire l'azione
+            case BaseAttack.modifiedStat.Mana:
+                currentMana += buff;
                 break;
-            case BaseAttack.typeOfAttack.StatChange:
+            case BaseAttack.modifiedStat.Attack:
+                currentAttack += buff;
+                break;
+            case BaseAttack.modifiedStat.Armor:
+                currentArmor += buff;
+                break;
+            case BaseAttack.modifiedStat.Speed:
+                currentSpeed += buff;
+                break;
+            case BaseAttack.modifiedStat.Evasion:
+                currentEvasion += buff;
+                break;
+            case BaseAttack.modifiedStat.NONE:
+                break;
+        }
+
+        switch (statToNerf)
+        {
+            case BaseAttack.modifiedStat.Health:
+                currentHealth += nerf;
+                break;
+            case BaseAttack.modifiedStat.Mana:
+                currentMana += nerf;
+                break;
+            case BaseAttack.modifiedStat.Attack:
+                currentAttack += nerf;
+                break;
+            case BaseAttack.modifiedStat.Armor:
+                currentArmor += nerf;
+                break;
+            case BaseAttack.modifiedStat.Speed:
+                currentSpeed += nerf;
+                break;
+            case BaseAttack.modifiedStat.Evasion:
+                currentEvasion += nerf;
+                break;
+            case BaseAttack.modifiedStat.NONE:
                 break;
         }
     }
