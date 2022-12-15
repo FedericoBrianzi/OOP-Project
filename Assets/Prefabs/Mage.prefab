@@ -122,9 +122,10 @@ MonoBehaviour:
   <description>k__BackingField: Spellcaster whose power derives from supernatural
     forces.
   <attacks>k__BackingField:
+  - {fileID: 486445530048756563, guid: e569f37fc79afcd4c8113615588202d9, type: 3}
+  - {fileID: 5773505729102349613, guid: 3b19c62001dec3e408b0ba260735cb27, type: 3}
   - {fileID: 8014565029434378969, guid: d63acdf16ad376e44a780eb22cb39393, type: 3}
-  - {fileID: 2860974637167007785, guid: fcad26d9b2564f548a211bfbcc721a44, type: 3}
-  - {fileID: 6792342235718188874, guid: 4009c110ef5e85542b443d06dce9f650, type: 3}
+  <confusedAttack>k__BackingField: {fileID: 4485062775320103131, guid: 7c4e5f1d49b058e4d9eed551bc87d999, type: 3}
   myTurn: 0
 --- !u!1001 &1873487491774501713
 PrefabInstance:

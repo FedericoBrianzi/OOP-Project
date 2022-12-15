@@ -11,7 +11,6 @@ public class HandleUI : MonoBehaviour
     [SerializeField] private GameObject teamsSelectPanel;
     [SerializeField] private GameObject battlePanel;
 
-
     [Header("Battle Phase")]
     [SerializeField] private GameObject[] teamsStatsUI = new GameObject[6];
 
@@ -43,7 +42,7 @@ public class HandleUI : MonoBehaviour
     {
         teamsSelectPanel.SetActive(state == GameManager.GameState.PickTeams);
 
-        battlePanel.SetActive(state == GameManager.GameState.BattleStart || state == GameManager.GameState.PlayerTurn);
+        battlePanel.SetActive(state == GameManager.GameState.BattleStart);
         if (state == GameManager.GameState.BattleStart)
         {
             unitsOnField.AddRange(BSM.playerTeam);
@@ -112,7 +111,6 @@ public class HandleUI : MonoBehaviour
 
     public void ActivateMultiTargetPanel(GameObject[] targets) 
     {
-        Debug.Log(targets.Length);
         targetPanel.SetActive(true);
         targetButtons.Clear();
         foreach (GameObject target in targets)

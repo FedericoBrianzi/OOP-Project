@@ -125,6 +125,8 @@ MonoBehaviour:
   <attacks>k__BackingField:
   - {fileID: 2227228746978803984, guid: febdf0276d6a9f14b9a62743ce00def9, type: 3}
   - {fileID: 2860974637167007785, guid: fcad26d9b2564f548a211bfbcc721a44, type: 3}
+  - {fileID: 7460218989526314797, guid: 0b1eaa3ac7b0cd64c9e692915bb0e5f3, type: 3}
+  <confusedAttack>k__BackingField: {fileID: 4485062775320103131, guid: 7c4e5f1d49b058e4d9eed551bc87d999, type: 3}
   myTurn: 0
 --- !u!1001 &2481480137755824949
 PrefabInstance:

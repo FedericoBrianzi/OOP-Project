@@ -11,9 +11,6 @@ public class GameManager : MonoBehaviour
 
     public static event Action<GameState> OnGameStateChanged;
 
-    private GameObject[] playerTeam = new GameObject[3];
-    private GameObject[] enemyTeam = new GameObject[3];
-
     private void Awake()
     {
         Instance = this;
@@ -32,34 +29,13 @@ public class GameManager : MonoBehaviour
         {
             case GameState.PickTeams:
                 break;
-            case GameState.BattleStart: //puo essere probabilmente tolto
-                HandleBattleStart();
-                break;
-            case GameState.PlayerTurn:
-                HandlePlayerTurn();
-                break;
-            case GameState.PlayAttacks:
-
+            case GameState.BattleStart:
                 break;
             case GameState.BattleEnd:
                 HandleBattleEnd();
                 break;
         }
-        OnGameStateChanged?.Invoke(newState);
-    }
-    private void HandleBattleStart()
-    {
-        //playerTeam[0] = SpawnManager.Instance.units[0];
-        //playerTeam[1] = SpawnManager.Instance.units[1];
-        //playerTeam[2] = SpawnManager.Instance.units[2];
-        //enemyTeam[0] = SpawnManager.Instance.units[3];
-        //enemyTeam[1] = SpawnManager.Instance.units[4];
-        //enemyTeam[2] = SpawnManager.Instance.units[5];
-        UpdateGameState(GameState.PlayerTurn);
-    } 
-    private void HandlePlayerTurn()
-    {
-        //playerTeam[0].GetComponent<BaseClass>().myTurn = true;
+        OnGameStateChanged?.Invoke(newState); //if the game state changes, the event is sent with the newState
     }
 
     private void HandleBattleEnd()
@@ -72,21 +48,10 @@ public class GameManager : MonoBehaviour
         UpdateGameState(GameState.BattleStart);
     }
 
-    public GameObject[] GetPlayerTeam()
-    {
-        return playerTeam;
-    }
-    public GameObject[] GetEnemyTeam()
-    {
-        return enemyTeam;
-    }
-
     public enum GameState
     {
         PickTeams,
         BattleStart,
-        PlayerTurn,
-        PlayAttacks,
         BattleEnd
     }
 }

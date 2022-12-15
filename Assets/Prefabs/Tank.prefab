@@ -122,9 +122,10 @@ MonoBehaviour:
   <evasion>k__BackingField: 2
   <description>k__BackingField: An armored fighter providing protection on the field.
   <attacks>k__BackingField:
-  - {fileID: 2227228746978803984, guid: febdf0276d6a9f14b9a62743ce00def9, type: 3}
-  - {fileID: 2860974637167007785, guid: fcad26d9b2564f548a211bfbcc721a44, type: 3}
-  - {fileID: 8014565029434378969, guid: d63acdf16ad376e44a780eb22cb39393, type: 3}
+  - {fileID: 486445530048756563, guid: e569f37fc79afcd4c8113615588202d9, type: 3}
+  - {fileID: 5033775857396377185, guid: bb7bf2c054fce03458915bbb5d5e93d7, type: 3}
+  - {fileID: 9104769435384959411, guid: 45cc08063f70fd146ba2cca9176e4d20, type: 3}
+  <confusedAttack>k__BackingField: {fileID: 4485062775320103131, guid: 7c4e5f1d49b058e4d9eed551bc87d999, type: 3}
   myTurn: 0
 --- !u!1001 &2513802865947790519
 PrefabInstance:

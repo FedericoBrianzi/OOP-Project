@@ -11,6 +11,7 @@ public class Encourage : BaseAttack
         attackManaCost = 10;
         statBuffQuantity = 20;
         statNerfQuantity = 0;
+        statusSuccessRate = 0;
 
         ignoreArmor = false;
 
@@ -18,5 +19,6 @@ public class Encourage : BaseAttack
         buffedStat = modifiedStat.Attack;
         nerfedStat = modifiedStat.NONE;
         attackType = typeOfAttack.StatChange;
+        statusChange = StatusEffect.NONE;
     }
 }

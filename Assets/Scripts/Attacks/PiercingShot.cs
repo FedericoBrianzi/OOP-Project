@@ -11,6 +11,7 @@ public class PiercingShot : BaseAttack
         attackManaCost = 10;
         statBuffQuantity = 0;
         statNerfQuantity = 0;
+        statusSuccessRate = 0;
 
         ignoreArmor = true;
 
@@ -18,5 +19,6 @@ public class PiercingShot : BaseAttack
         buffedStat = modifiedStat.NONE;
         nerfedStat = modifiedStat.NONE;
         attackType = typeOfAttack.Damage;
+        statusChange = StatusEffect.NONE;
     }
 }

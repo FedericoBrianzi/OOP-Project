@@ -123,8 +123,10 @@ MonoBehaviour:
   <evasion>k__BackingField: 15
   <description>k__BackingField: The hawk eye, whose arrow is infallible.
   <attacks>k__BackingField:
+  - {fileID: 6182762601059479315, guid: 3531f410c3f76fe4181c29ac007cfeee, type: 3}
   - {fileID: 1701149966952092727, guid: 76f475f694ba1b44194aa38335e0c717, type: 3}
   - {fileID: 8014565029434378969, guid: d63acdf16ad376e44a780eb22cb39393, type: 3}
+  <confusedAttack>k__BackingField: {fileID: 4485062775320103131, guid: 7c4e5f1d49b058e4d9eed551bc87d999, type: 3}
   myTurn: 0
 --- !u!1001 &227469482858890103
 PrefabInstance:

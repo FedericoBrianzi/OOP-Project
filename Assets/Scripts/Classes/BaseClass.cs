@@ -21,10 +21,25 @@ public abstract class BaseClass : MonoBehaviour
     public int currentEvasion { get; private set; }
     [field: SerializeField] public string description { get; private set; }
     [field: SerializeField] public List<BaseAttack> attacks { get; private set; } = new List<BaseAttack>();
+    [field: SerializeField] public BaseAttack confusedAttack { get; private set; }
 
     protected bool isDefending = false;
 
     public bool myTurn = false;
+    public enum StatusEffect
+    {
+        Burned,
+        Poisoned,
+        Stunned,
+        Paralyzed,
+        Provoked,
+        Asleep,
+        Confused,
+        BerserkWrath,
+        NONE
+    }
+
+    public List<StatusEffect> activeStatusEffects { get; private set; } = new List<StatusEffect>();
 
     protected void Start()
     {
@@ -42,9 +57,13 @@ public abstract class BaseClass : MonoBehaviour
         {
             case BaseAttack.typeOfAttack.Damage:
                 TakeDamage(totalDamage, attack.ignoreArmor);
+                if(gameObject.TryGetComponent(out Berserk berserk) && currentHealth <= Mathf.RoundToInt(maxHealth / 3))
+                {
+                    activeStatusEffects.Add(StatusEffect.BerserkWrath);
+                }
                 break;
             case BaseAttack.typeOfAttack.Defend:
-                isDefending = true; //vorrei che chi si difende fosse sempre il primo a eseguire l'azione
+                isDefending = true; 
                 break;
             case BaseAttack.typeOfAttack.StatChange:
                 ChangeStat(attack.buffedStat, attack.nerfedStat, attack.statBuffQuantity, attack.statNerfQuantity);
@@ -52,6 +71,12 @@ public abstract class BaseClass : MonoBehaviour
             case BaseAttack.typeOfAttack.DmgAndStatChange:
                 TakeDamage(totalDamage, attack.ignoreArmor);
                 ChangeStat(attack.buffedStat, attack.nerfedStat, attack.statBuffQuantity, attack.statNerfQuantity);
+                break;
+            case BaseAttack.typeOfAttack.Status:
+                TakeDamage(totalDamage, attack.ignoreArmor);
+                break;
+            case BaseAttack.typeOfAttack.DmgAndStatus:
+                TakeDamage(totalDamage, attack.ignoreArmor);
                 break;
         }
     }
@@ -130,5 +155,18 @@ public abstract class BaseClass : MonoBehaviour
     public virtual void SubtractMana(int manaCost)
     {
         currentMana -= manaCost;
+    }
+
+    public virtual void TakeStatusEffectDamage(StatusEffect status)
+    {
+        switch (status)
+        {
+            case StatusEffect.Burned:
+                currentHealth -= Mathf.RoundToInt(currentHealth * 5 / 100);
+                break;
+            case StatusEffect.Poisoned:
+                currentHealth -= Mathf.RoundToInt(currentHealth * 10 / 100);
+                break;
+        }
     }
 }

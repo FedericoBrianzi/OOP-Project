@@ -2,23 +2,23 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Slash : BaseAttack
+public class Armorbreak : BaseAttack
 {
-    public Slash()
+    public Armorbreak()
     {
-        attackName = "Slash";
+        attackName = "Armorbreak";
         attackDamage = 15;
-        attackManaCost = 0;
+        attackManaCost = 15;
         statBuffQuantity = 0;
-        statNerfQuantity = 0;
+        statNerfQuantity = 25;
         statusSuccessRate = 0;
 
         ignoreArmor = false;
 
         numberOfTargets = typeOfTarget.SingleEnemyTarget;
         buffedStat = modifiedStat.NONE;
-        nerfedStat = modifiedStat.NONE;
-        attackType = typeOfAttack.Damage; 
+        nerfedStat = modifiedStat.Armor;
+        attackType = typeOfAttack.DmgAndStatChange;
         statusChange = StatusEffect.NONE;
     }
 }

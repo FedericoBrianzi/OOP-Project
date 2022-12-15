@@ -2,23 +2,23 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Slash : BaseAttack
+public class Smash : BaseAttack
 {
-    public Slash()
+    public Smash()
     {
-        attackName = "Slash";
-        attackDamage = 15;
-        attackManaCost = 0;
+        attackName = "Smash";
+        attackDamage = 10;
+        attackManaCost = 5;
         statBuffQuantity = 0;
         statNerfQuantity = 0;
-        statusSuccessRate = 0;
+        statusSuccessRate = 10;
 
         ignoreArmor = false;
 
         numberOfTargets = typeOfTarget.SingleEnemyTarget;
         buffedStat = modifiedStat.NONE;
         nerfedStat = modifiedStat.NONE;
-        attackType = typeOfAttack.Damage; 
-        statusChange = StatusEffect.NONE;
+        attackType = typeOfAttack.Damage;
+        statusChange = StatusEffect.Stun;
     }
 }

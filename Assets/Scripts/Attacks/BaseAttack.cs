@@ -14,6 +14,7 @@ public class BaseAttack : MonoBehaviour
     public int attackManaCost;
     public int statBuffQuantity;
     public int statNerfQuantity;
+    public int statusSuccessRate;
 
     public bool ignoreArmor;
     public enum typeOfTarget
@@ -24,7 +25,8 @@ public class BaseAttack : MonoBehaviour
         Self,
         SingleAllyTarget,
         MultiAllyTargets,
-        AllAllyTargets
+        AllAllyTargets,
+        Random
     }
 
     public enum modifiedStat
@@ -43,11 +45,26 @@ public class BaseAttack : MonoBehaviour
         Damage,
         Defend,
         StatChange,
-        DmgAndStatChange
+        DmgAndStatChange,
+        Status,
+        DmgAndStatus
+    }
+
+    public enum StatusEffect
+    {
+        Burn,
+        Poison,
+        Stun,
+        Paralyze,
+        Provoke,
+        Sleep,
+        Confuse,
+        NONE
     }
 
     public typeOfTarget numberOfTargets;
     public modifiedStat buffedStat;
     public modifiedStat nerfedStat;
     public typeOfAttack attackType;
+    public StatusEffect statusChange;
 }

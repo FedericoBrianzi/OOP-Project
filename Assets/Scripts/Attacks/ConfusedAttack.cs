@@ -2,12 +2,12 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Slash : BaseAttack
+public class ConfusedAttack : BaseAttack
 {
-    public Slash()
+    public ConfusedAttack()
     {
-        attackName = "Slash";
-        attackDamage = 15;
+        attackName = "ConfusedAttack";
+        attackDamage = 10;
         attackManaCost = 0;
         statBuffQuantity = 0;
         statNerfQuantity = 0;
@@ -15,10 +15,10 @@ public class Slash : BaseAttack
 
         ignoreArmor = false;
 
-        numberOfTargets = typeOfTarget.SingleEnemyTarget;
+        numberOfTargets = typeOfTarget.Random;
         buffedStat = modifiedStat.NONE;
         nerfedStat = modifiedStat.NONE;
-        attackType = typeOfAttack.Damage; 
+        attackType = typeOfAttack.Damage;
         statusChange = StatusEffect.NONE;
     }
 }

@@ -15,14 +15,13 @@ public class SpawnManager : MonoBehaviour
     private Vector3 pos5 = new Vector3(11, 1.5f, 2);
     private Vector3 pos6 = new Vector3(11, 1.5f, 7);
     private Vector3[] spawnPositions = new Vector3[6];
-    private int i = 0;
+
     public List<GameObject> units = new List<GameObject>();
 
-    [SerializeField] private TextMeshProUGUI sideText;
+    [SerializeField] private TextMeshProUGUI sideText; 
     [SerializeField] private Button battleButton;
 
-    public List<GameObject> playerTeam = new List<GameObject>();
-    public List<GameObject> enemyTeam = new List<GameObject>();
+    private int i = 0;
 
     private void Awake()
     {

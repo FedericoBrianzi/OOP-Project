@@ -2,22 +2,22 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Dodge : BaseAttack
+public class Enrage : BaseAttack
 {
-    public Dodge()
+    public Enrage()
     {
-        attackName = "Dodge";
+        attackName = "Enrage";
         attackDamage = 0;
-        attackManaCost = 5;
-        statBuffQuantity = 35;
-        statNerfQuantity = 0;
+        attackManaCost = 10;
+        statBuffQuantity = 40;
+        statNerfQuantity = 30;
         statusSuccessRate = 0;
 
         ignoreArmor = false;
 
         numberOfTargets = typeOfTarget.Self;
-        buffedStat = modifiedStat.Evasion;
-        nerfedStat = modifiedStat.NONE;
+        buffedStat = modifiedStat.Attack;
+        nerfedStat = modifiedStat.Armor;
         attackType = typeOfAttack.StatChange;
         statusChange = StatusEffect.NONE;
     }

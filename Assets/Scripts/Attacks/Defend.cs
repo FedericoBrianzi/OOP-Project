@@ -11,6 +11,7 @@ public class Defend : BaseAttack
         attackManaCost = 0;
         statBuffQuantity = 0;
         statNerfQuantity = 0;
+        statusSuccessRate = 0;
 
         ignoreArmor = false;
 
@@ -18,5 +19,6 @@ public class Defend : BaseAttack
         buffedStat = modifiedStat.NONE;
         nerfedStat = modifiedStat.NONE;
         attackType = typeOfAttack.Defend;
+        statusChange = StatusEffect.NONE;
     }
 }

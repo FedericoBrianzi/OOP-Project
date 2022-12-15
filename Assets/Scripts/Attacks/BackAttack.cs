@@ -10,13 +10,15 @@ public class BackAttack : BaseAttack
         attackDamage = 20;
         attackManaCost = 15;
         statBuffQuantity = 0;
-        statNerfQuantity = 10;
+        statNerfQuantity = 0;
+        statusSuccessRate = 20;
 
         ignoreArmor = true;
 
         numberOfTargets = typeOfTarget.SingleEnemyTarget;
         buffedStat = modifiedStat.NONE;
-        nerfedStat = modifiedStat.Armor;
-        attackType = typeOfAttack.DmgAndStatChange;
+        nerfedStat = modifiedStat.NONE;
+        attackType = typeOfAttack.DmgAndStatus;
+        statusChange = StatusEffect.Paralyze;
     }
 }

@@ -2,21 +2,21 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Dodge : BaseAttack
+public class Barrier : BaseAttack
 {
-    public Dodge()
+    public Barrier()
     {
-        attackName = "Dodge";
+        attackName = "Barrier";
         attackDamage = 0;
-        attackManaCost = 5;
-        statBuffQuantity = 35;
+        attackManaCost = 15;
+        statBuffQuantity = 10;
         statNerfQuantity = 0;
         statusSuccessRate = 0;
 
         ignoreArmor = false;
 
-        numberOfTargets = typeOfTarget.Self;
-        buffedStat = modifiedStat.Evasion;
+        numberOfTargets = typeOfTarget.AllAllyTargets;
+        buffedStat = modifiedStat.Armor;
         nerfedStat = modifiedStat.NONE;
         attackType = typeOfAttack.StatChange;
         statusChange = StatusEffect.NONE;

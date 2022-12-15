@@ -2,23 +2,23 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Slash : BaseAttack
+public class Provoke : BaseAttack
 {
-    public Slash()
+    public Provoke()
     {
-        attackName = "Slash";
-        attackDamage = 15;
-        attackManaCost = 0;
+        attackName = "Provoke";
+        attackDamage = 0;
+        attackManaCost = 10;
         statBuffQuantity = 0;
         statNerfQuantity = 0;
-        statusSuccessRate = 0;
+        statusSuccessRate = 100;
 
         ignoreArmor = false;
 
         numberOfTargets = typeOfTarget.SingleEnemyTarget;
         buffedStat = modifiedStat.NONE;
         nerfedStat = modifiedStat.NONE;
-        attackType = typeOfAttack.Damage; 
-        statusChange = StatusEffect.NONE;
+        attackType = typeOfAttack.Status;
+        statusChange = StatusEffect.Provoke;
     }
 }

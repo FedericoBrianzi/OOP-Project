@@ -123,8 +123,10 @@ MonoBehaviour:
   <description>k__BackingField: A reaper living in the shadows, bringing deaths to
     the enemy lines.
   <attacks>k__BackingField:
+  - {fileID: 2227228746978803984, guid: febdf0276d6a9f14b9a62743ce00def9, type: 3}
   - {fileID: 4934856321295563870, guid: 85411ac4f4bad6f449f198a574303fcb, type: 3}
   - {fileID: 6792342235718188874, guid: 4009c110ef5e85542b443d06dce9f650, type: 3}
+  <confusedAttack>k__BackingField: {fileID: 4485062775320103131, guid: 7c4e5f1d49b058e4d9eed551bc87d999, type: 3}
   myTurn: 0
 --- !u!1001 &642004265706278615
 PrefabInstance:

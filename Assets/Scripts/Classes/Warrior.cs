@@ -4,8 +4,5 @@ using UnityEngine;
 
 public class Warrior : BaseClass
 {
-    private void Start()
-    {
-        base.Start();
-    }
+
 }

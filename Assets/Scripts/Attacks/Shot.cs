@@ -2,11 +2,11 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Slash : BaseAttack
+public class Shot : BaseAttack
 {
-    public Slash()
+    public Shot()
     {
-        attackName = "Slash";
+        attackName = "Shot";
         attackDamage = 15;
         attackManaCost = 0;
         statBuffQuantity = 0;
@@ -18,7 +18,7 @@ public class Slash : BaseAttack
         numberOfTargets = typeOfTarget.SingleEnemyTarget;
         buffedStat = modifiedStat.NONE;
         nerfedStat = modifiedStat.NONE;
-        attackType = typeOfAttack.Damage; 
+        attackType = typeOfAttack.Damage;
         statusChange = StatusEffect.NONE;
     }
 }
