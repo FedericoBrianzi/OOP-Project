@@ -8,8 +8,8 @@ public class Encourage : BaseAttack
     {
         attackName = "Encourage";
         attackDamage = 0;
-        attackManaCost = 10;
-        statBuffQuantity = 20;
+        attackManaCost = 5;
+        statBuffQuantity = 15;
         statNerfQuantity = 0;
         statusSuccessRate = 0;
 

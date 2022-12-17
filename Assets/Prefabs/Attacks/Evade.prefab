@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 5212498460716107798}
   - component: {fileID: 8014565029434378969}
   m_Layer: 0
-  m_Name: Dodge
+  m_Name: Evade
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -44,13 +44,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 43e7d7be5149a3348a33cbd14e540966, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  attackName: Dodge
+  attackName: Evade
   attackDamage: 0
   attackManaCost: 5
-  statBuffQuantity: 35
+  statBuffQuantity: 25
   statNerfQuantity: 0
+  statusSuccessRate: 0
   ignoreArmor: 0
-  defendPose: 0
   numberOfTargets: 3
   buffedStat: 5
   nerfedStat: 6
+  attackType: 2
+  statusChange: 7

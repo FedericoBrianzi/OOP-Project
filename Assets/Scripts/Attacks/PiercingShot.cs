@@ -7,7 +7,7 @@ public class PiercingShot : BaseAttack
     public PiercingShot()
     {
         attackName = "PiercingShot";
-        attackDamage = 20;
+        attackDamage = 10;
         attackManaCost = 10;
         statBuffQuantity = 0;
         statNerfQuantity = 0;

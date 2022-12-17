@@ -14,7 +14,7 @@ public class PlayerStateMachine : MonoBehaviour
         GameManager.OnGameStateChanged += GameManagerOnGameStateChanged;
         BSM = GameObject.Find("BattleManager").GetComponent<BattleStateMachine>();
         myClass = GetComponent<BaseClass>();
-        currentState = TurnState.WAITING;
+        currentState = TurnState.TEAMSELECTION;
     }
 
     private void GameManagerOnGameStateChanged(GameManager.GameState state)
@@ -25,17 +25,22 @@ public class PlayerStateMachine : MonoBehaviour
         }
     }
 
-    // Update is called once per frame
     void Update()
     {
         switch (currentState)
         {
+            case TurnState.TEAMSELECTION:
+                break;
             case TurnState.ADDTOLIST:
                 BSM.AddHeroToList(gameObject);
                 currentState = TurnState.WAITING;
                 break;
             case TurnState.WAITING:
                 //waiting to perform the action
+                if (BSM.actionsToPerform.Count == 0 && BSM.battleState == BattleStateMachine.BattleState.WAIT)    //questo andrebbe credo in action, poi vedremo
+                {
+                    currentState = TurnState.ADDTOLIST;
+                }
                 break;
             case TurnState.ACTION:
                 break;
@@ -44,9 +49,9 @@ public class PlayerStateMachine : MonoBehaviour
         }
     }
 
-
     private enum TurnState
     {
+        TEAMSELECTION,
         ADDTOLIST,
         WAITING,
         ACTION,

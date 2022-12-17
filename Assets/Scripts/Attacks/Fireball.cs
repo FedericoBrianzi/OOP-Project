@@ -7,8 +7,8 @@ public class Fireball : BaseAttack
     public Fireball()
     {
         attackName = "Fireball";
-        attackDamage = 40;
-        attackManaCost = 30;
+        attackDamage = 15;
+        attackManaCost = 25;
         statBuffQuantity = 0;
         statNerfQuantity = 0;
         statusSuccessRate = 15;
@@ -18,7 +18,7 @@ public class Fireball : BaseAttack
         numberOfTargets = typeOfTarget.MultiEnemyTargets;
         buffedStat = modifiedStat.NONE;
         nerfedStat = modifiedStat.NONE;
-        attackType = typeOfAttack.Damage;
+        attackType = typeOfAttack.DmgAndStatus;
         statusChange = StatusEffect.Burn;
     }
 }

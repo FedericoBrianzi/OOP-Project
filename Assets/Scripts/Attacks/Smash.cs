@@ -8,7 +8,7 @@ public class Smash : BaseAttack
     {
         attackName = "Smash";
         attackDamage = 10;
-        attackManaCost = 5;
+        attackManaCost = 0;
         statBuffQuantity = 0;
         statNerfQuantity = 0;
         statusSuccessRate = 10;
@@ -18,7 +18,7 @@ public class Smash : BaseAttack
         numberOfTargets = typeOfTarget.SingleEnemyTarget;
         buffedStat = modifiedStat.NONE;
         nerfedStat = modifiedStat.NONE;
-        attackType = typeOfAttack.Damage;
+        attackType = typeOfAttack.DmgAndStatus;
         statusChange = StatusEffect.Stun;
     }
 }

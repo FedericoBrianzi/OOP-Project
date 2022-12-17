@@ -45,12 +45,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   attackName: Fireball
-  attackDamage: 40
-  attackManaCost: 30
+  attackDamage: 15
+  attackManaCost: 25
   statBuffQuantity: 0
   statNerfQuantity: 0
+  statusSuccessRate: 15
   ignoreArmor: 0
   numberOfTargets: 1
   buffedStat: 6
   nerfedStat: 6
-  attackType: 0
+  attackType: 5
+  statusChange: 0

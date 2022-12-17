@@ -44,13 +44,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2760dc6edb0bf4942a45405d4d7cb59b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  attackName: Piercing Shot
+  attackName: PiercingShot
   attackDamage: 10
   attackManaCost: 10
   statBuffQuantity: 0
   statNerfQuantity: 0
+  statusSuccessRate: 0
   ignoreArmor: 1
-  defendPose: 0
   numberOfTargets: 0
   buffedStat: 6
   nerfedStat: 6
+  attackType: 0
+  statusChange: 7

@@ -14,7 +14,7 @@ public class EnemyStateMachine : MonoBehaviour
     private void Awake()
     {
         GameManager.OnGameStateChanged += GameManagerOnGameStateChanged;
-        currentState = TurnState.WAITING;
+        currentState = TurnState.TEAMSELECTION;
     }
 
     private void OnDestroy()
@@ -36,10 +36,16 @@ public class EnemyStateMachine : MonoBehaviour
     {
         switch (currentState)
         {
+            case TurnState.TEAMSELECTION:
+                break;
             case TurnState.CHOOSEACTION:
                 ChooseAction();
                 break;
             case TurnState.WAITING:
+                if(BSM.actionsToPerform.Count == 0 && BSM.battleState == BattleStateMachine.BattleState.WAIT)
+                {
+                    currentState = TurnState.CHOOSEACTION;
+                }
                 break;
             case TurnState.ACTION:
                 break;
@@ -51,10 +57,37 @@ public class EnemyStateMachine : MonoBehaviour
     private void ChooseAction()
     {
         HandleTurn myAction = new HandleTurn();
-        myAction.attackerName = myClass.name;
+        myAction.attackerName = myClass.unitName;
         myAction.attackerGO = this.gameObject;
-        myAction.attack = myClass.attacks[Random.Range(0, myClass.attacks.Count)];
+        if (myClass.activeStatusEffects.Contains(BaseClass.StatusEffect.Provoked))
+        {
+            myAction.attack = SelectAttackWhenProvoked();
+        }
+        else myAction.attack = CheckManaCost(myClass.attacks)[Random.Range(0, CheckManaCost(myClass.attacks).Count)];   ///CheckManaCost returns a list of usable attacks
         SelectTarget(myAction, myAction.attack);
+    }
+
+    private BaseAttack SelectAttackWhenProvoked()
+    {
+        List<BaseAttack> attacksForEnemies = new List<BaseAttack>();
+        foreach (BaseAttack attack in myClass.attacks)
+        {
+            if(attack.numberOfTargets == BaseAttack.typeOfTarget.SingleEnemyTarget || attack.numberOfTargets == BaseAttack.typeOfTarget.MultiEnemyTargets || attack.numberOfTargets == BaseAttack.typeOfTarget.AllEnemyTargets)
+            {
+                attacksForEnemies.Add(attack);
+            }
+        }
+        return CheckManaCost(attacksForEnemies)[Random.Range(0, CheckManaCost(attacksForEnemies).Count)];
+    }
+
+    private List<BaseAttack> CheckManaCost(List<BaseAttack> attacksToCheck)
+    {
+        List<BaseAttack> usableAttacks = new List<BaseAttack>();
+        foreach(BaseAttack attack in attacksToCheck)
+        {
+            if (attack.attackManaCost <= myClass.currentMana) usableAttacks.Add(attack);
+        }
+        return usableAttacks;
     }
 
     private void SelectTarget(HandleTurn myAction, BaseAttack attack)
@@ -147,6 +180,7 @@ public class EnemyStateMachine : MonoBehaviour
 
     private enum TurnState
     {
+        TEAMSELECTION,
         CHOOSEACTION,
         WAITING,
         ACTION,

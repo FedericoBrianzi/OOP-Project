@@ -10,7 +10,7 @@ public class Armorbreak : BaseAttack
         attackDamage = 15;
         attackManaCost = 15;
         statBuffQuantity = 0;
-        statNerfQuantity = 25;
+        statNerfQuantity = 15;
         statusSuccessRate = 0;
 
         ignoreArmor = false;

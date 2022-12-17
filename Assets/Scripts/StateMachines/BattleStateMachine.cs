@@ -11,20 +11,19 @@ public class BattleStateMachine : MonoBehaviour
     public List<GameObject> playerTeam { get; private set; } = new List<GameObject>();
     public List<GameObject> enemyTeam { get; private set; } = new List<GameObject>();
 
-    [SerializeField] private List<HandleTurn> actionsToPerform = new List<HandleTurn>();
+    [field: SerializeField] public List<HandleTurn> actionsToPerform { get; private set; } = new List<HandleTurn>();
 
     private List<GameObject> heroesToManage = new List<GameObject>();
     private List<GameObject> targetsToManage = new List<GameObject>();
     private HandleTurn heroAction;
-
-    [SerializeField] private GameObject actionPanel;
-    [SerializeField] private GameObject selectTargetPanel;
-    [SerializeField] private GameObject actionDescriptionPanel;
+    private BaseClass attackerClass;
+    private List<BaseClass> unitsClasses = new List<BaseClass>();
 
     private HandleUI uiHandler;
 
     private bool isTargetSelected = false;
-    private enum BattleState
+    private bool isAttacking = false;
+    public enum BattleState
     {
         TEAMSELECTION,
         WAIT,
@@ -40,9 +39,8 @@ public class BattleStateMachine : MonoBehaviour
         DONE
     }
 
-    private BattleState battleState;
+    public BattleState battleState { get; private set; }
     private HeroStates heroInput;
-    private bool isAttacking = false;
 
     private void Awake()
     {
@@ -68,10 +66,10 @@ public class BattleStateMachine : MonoBehaviour
         switch (battleState)
         {
             case BattleState.TEAMSELECTION:
-                //just waiting for the battle to start
+                ///just waiting for the battle to start
                 break;
 
-            case BattleState.WAIT: //waiting for every unit on the field to choose an action
+            case BattleState.WAIT: ///waiting for every unit on the field to choose an action
                 if (actionsToPerform.Count == playerTeam.Count + enemyTeam.Count) 
                 {
                     battleState = BattleState.SORTACTIONS;
@@ -79,11 +77,11 @@ public class BattleStateMachine : MonoBehaviour
                 break;
 
             case BattleState.SORTACTIONS:
-                actionsToPerform.Sort();    //implemented an iComparable interface to sort the list of HandleTurns by the currentSpeed of the performer of the action
+                actionsToPerform.Sort();    ///implemented an iComparable interface to sort the list of HandleTurns by the currentSpeed of the performer of the action
                 actionsToPerform.Reverse();
                 for(int i = 0; i < actionsToPerform.Count; i++)
                 {
-                    if(actionsToPerform[i].attack.attackType == BaseAttack.typeOfAttack.Defend) //Defend actions are always first
+                    if(actionsToPerform[i].attack.attackType == BaseAttack.typeOfAttack.Defend) ///Defend actions are always first
                     {
                         actionsToPerform.Insert(0, actionsToPerform[i]);
                         actionsToPerform.RemoveAt(i + 1);
@@ -92,26 +90,30 @@ public class BattleStateMachine : MonoBehaviour
                 battleState = BattleState.PERFORMACTION;
                 break;
 
-            case BattleState.PERFORMACTION: //performing every action
+            case BattleState.PERFORMACTION: ///performing every action
                 if (actionsToPerform.Count > 0 && !isAttacking)
                 {
                     StartCoroutine(PerformAction());
                 }
                 else if (actionsToPerform.Count > 0 && isAttacking) break;
-                else battleState = BattleState.WAIT;
+                else if (actionsToPerform.Count == 0 && !isAttacking)
+                {
+                    uiHandler.HideActionDescription();
+                    battleState = BattleState.WAIT;
+                }
                 break;
-
         }
 
         switch (heroInput)
         {
             case HeroStates.TEAMSELECTION:
-                //waiting for battle to start
+                ///waiting for battle to start
                 break;
             case HeroStates.ACTIVATE:
                 if(heroesToManage.Count > 0)
                 {
                     uiHandler.ActivateActionPanel(heroesToManage[0]);
+                    heroesToManage[0].GetComponent<BaseClass>().indicator.SetActive(true);
                     heroAction = new HandleTurn();
                     heroInput = HeroStates.WAITING;
                 }
@@ -123,132 +125,7 @@ public class BattleStateMachine : MonoBehaviour
         }
     }
 
-    IEnumerator PerformAction()
-    {
-        BaseClass attackerClass = actionsToPerform[0].attackerGO.GetComponent<BaseClass>();
-        isAttacking = true;
-        if (attackerClass.activeStatusEffects.Count == 0)
-        {
-            actionDescriptionPanel.SetActive(true);     /////da spostare nel uihandler
-            TextMeshProUGUI actionText = actionDescriptionPanel.transform.GetChild(0).GetComponent<TextMeshProUGUI>();
-            if (actionsToPerform[0].attackTargets.Count == 1)
-            {
-                actionText.text = actionsToPerform[0].attackerName + " uses " + actionsToPerform[0].attack.attackName + " on " + actionsToPerform[0].attackTargets[0].GetComponent<BaseClass>().name;
-            }
-            else if (actionsToPerform[0].attackTargets.Count == enemyTeam.Count)
-            {
-                actionText.text = actionsToPerform[0].attackerName + " uses " + actionsToPerform[0].attack.attackName + " on the other team";
-            }
-            else actionText.text = actionsToPerform[0].attackerName + " uses " + actionsToPerform[0].attack.attackName + " on " + actionsToPerform[0].attackTargets[0].GetComponent<BaseClass>().name + " and " + actionsToPerform[0].attackTargets[1].GetComponent<BaseClass>().name;
-            ////////
-
-            attackerClass.SubtractMana(actionsToPerform[0].attack.GetComponent<BaseAttack>().attackManaCost);    //devo farne una fuzione PerformAttack()
-            int damageTotal = CalculateDamage(actionsToPerform[0].attack.attackDamage, attackerClass.currentAttack);
-            foreach (GameObject target in actionsToPerform[0].attackTargets)
-            {
-                target.GetComponent<BaseClass>().EvaluateAttack(actionsToPerform[0].attack, damageTotal);
-            }
-            //EvaluateStatusEffectAfterAttack(); in this project this is useless since it only matters if the attacker gets a status effect after hitting the target
-            //for example an enemy with poisoning or burning body parts
-            actionsToPerform.RemoveAt(0);
-
-        }
-        else EvaluateStatusEffectBeforeAttack();
-        //devo chiamare EvaluateStatusEffectAfterAttack anche se l'azione alla fine non viene eseguita(stun, paralizzato, addormentato)
-        //quindi non basta chiamarlo dopo PerformAttack.
-        
-        yield return new WaitForSeconds(2f);
-        uiHandler.UpdateBattleUI();
-        actionDescriptionPanel.SetActive(false);
-        isAttacking = false;
-    }
-
-    private void EvaluateStatusEffectBeforeAttack()
-    {
-        foreach(BaseClass.StatusEffect activeStatus in actionsToPerform[0].attackerGO.GetComponent<BaseClass>().activeStatusEffects)
-        {//è importante che decida che priorità hanno gli status effect(forse non serve se alcuni status ne annullano altri e altri non possono essere attivati quando certi sono attivi)
-         //ad esempio: tizio addormentato non può essere confuso o provocato oppure stunnato sovrascrive paralizzato
-            switch (activeStatus)
-            {
-                case BaseClass.StatusEffect.Confused:
-                    //testo bersaglio confuso (qualche secondo di tempo per far vedere che è confuso ma magari riesce ad attaccare comunque)
-                    if(Random.Range(0, 100) < 33)
-                    {
-                        actionsToPerform[0].attack = actionsToPerform[0].attackerGO.GetComponent<BaseClass>().confusedAttack;
-                        actionsToPerform[0].attackTargets.Clear();
-                        if (Random.Range(0, 2) == 0)
-                        {
-                            actionsToPerform[0].attackTargets.Add(playerTeam[Random.Range(0, playerTeam.Count)]);
-                        }
-                        else
-                        {
-                            actionsToPerform[0].attackTargets.Add(enemyTeam[Random.Range(0, enemyTeam.Count)]);
-                        }
-                        //testo attaccante confuso che attacca bersaglio randomico 
-                        //PeformAttack();
-                    }
-                    //else PerformAttack();
-                    break;
-                case BaseClass.StatusEffect.Paralyzed:
-                    //testo bersaglio paralizzato (qualche secondo di tempo per far vedere che è paralizzato ma magari riesce ad attaccare comunque)
-                    if (Random.Range(0, 100) < 50)
-                    {
-                        actionsToPerform.RemoveAt(0);
-                        //testo attaccante paralizzato e non riesce ad attaccare
-                    }
-                    //else PerformAttack();
-                    break;
-                case BaseClass.StatusEffect.Provoked:
-                    //devo pensare meglio a come gestirla poichè ho bisogno di sapere da chi è stato provocato e se il provoke è valido se utilizzato quando un altro target è già stato selezionato.
-                    //teoricamente si, ma oltre a ciò il provoke fa anche in modo che prima di scegliere l'attaco il provocatore sia l'unico bersaglio selezionabile.
-                    break;
-                case BaseClass.StatusEffect.Stunned:
-                    actionsToPerform.RemoveAt(0);
-                    //testo attaccante stunnato e non riesce ad attaccare
-                    break;
-                case BaseClass.StatusEffect.Asleep:
-                    if(Random.Range(0, 100) < 67)
-                    {
-                        actionsToPerform.RemoveAt(0);
-                        //testo attaccante addormentato e non riesce ad attaccare
-                    }
-                    else
-                    {
-                        actionsToPerform[0].attackerGO.GetComponent<BaseClass>().activeStatusEffects.Remove(BaseClass.StatusEffect.Asleep);
-                        //PerformAttack();
-                    }
-                    break;
-            }
-        }
-    }   //non so chi sarebbe meglio valutasse gli status effects ma vorrei che la state machine si occupasse solo degli stati della battaglia
-
-    private void EvaluateStatusEffectAfterAttack()
-    {
-        foreach (BaseClass.StatusEffect activeStatus in actionsToPerform[0].attackerGO.GetComponent<BaseClass>().activeStatusEffects)
-        {
-            switch (activeStatus)
-            {
-                case BaseClass.StatusEffect.Burned:
-                    //testo 
-                    actionsToPerform[0].attackerGO.GetComponent<BaseClass>().TakeStatusEffectDamage(activeStatus);
-                    break;
-                case BaseClass.StatusEffect.Poisoned:
-                    actionsToPerform[0].attackerGO.GetComponent<BaseClass>().TakeStatusEffectDamage(activeStatus);
-                    break;
-            }
-        }
-    }
-
-    public void SetNewActionToPerform(HandleTurn action)
-    {
-        actionsToPerform.Add(action);
-    }
-
-    private int CalculateDamage(int atkDmg, int unitAtk)
-    {
-        return atkDmg + unitAtk; //da tweakare
-    }
-
+    #region Player HandleTurn Methods
     public void AddHeroToList(GameObject pUnit)
     {
         heroesToManage.Add(pUnit);
@@ -259,7 +136,7 @@ public class BattleStateMachine : MonoBehaviour
         isTargetSelected = false;
         targetsToManage.Clear();
 
-        heroAction.attackerName = heroesToManage[0].GetComponent<BaseClass>().name;
+        heroAction.attackerName = heroesToManage[0].GetComponent<BaseClass>().unitName;
         heroAction.attackerGO = heroesToManage[0].gameObject;
         heroAction.attack = chosenAttack;
         SelectTarget(heroAction, heroAction.attack);
@@ -275,6 +152,7 @@ public class BattleStateMachine : MonoBehaviour
     {
         uiHandler.DeactivateTargetPanel();
         heroAction.attackTargets.Add(target);
+        heroesToManage[0].GetComponent<BaseClass>().indicator.SetActive(false);
         actionsToPerform.Add(heroAction);
         heroesToManage.RemoveAt(0);
         heroInput = HeroStates.ACTIVATE;
@@ -338,4 +216,211 @@ public class BattleStateMachine : MonoBehaviour
                 break;
         }
     }
+    #endregion
+
+    #region Enemy HandleTurn Methods
+    public void SetNewActionToPerform(HandleTurn action)
+    {
+        actionsToPerform.Add(action);
+    }
+    #endregion
+
+    #region PerformAction Methods
+    IEnumerator PerformAction()
+    {
+        attackerClass = actionsToPerform[0].attackerGO.GetComponent<BaseClass>();
+        isAttacking = true;
+        if (attackerClass.activeStatusEffects.Count == 0)
+        {
+            yield return StartCoroutine(uiHandler.ShowActionDescription(actionsToPerform[0]));
+            yield return StartCoroutine(PerformAttack());
+            actionsToPerform.RemoveAt(0);
+        }
+        else yield return StartCoroutine(EvaluateStatusEffectBeforeAttack());
+        uiHandler.UpdateBattleUI();
+        if (actionsToPerform.Count == 0)
+        {
+            yield return StartCoroutine(EvaluateStatusEffectAfterAttack());
+        }
+        isAttacking = false;
+    }
+
+    private IEnumerator PerformAttack()
+    {
+        attackerClass.SubtractMana(actionsToPerform[0].attack.GetComponent<BaseAttack>().attackManaCost);
+        int damageTotal = CalculateDamage(actionsToPerform[0].attack.attackDamage, attackerClass.currentAttack);
+        while(actionsToPerform[0].attackTargets.Count != 0)
+        {
+            yield return StartCoroutine(actionsToPerform[0].attackTargets[0].GetComponent<BaseClass>().EvaluateAttack(actionsToPerform[0].attack, damageTotal, actionsToPerform[0].attackerGO));
+            actionsToPerform[0].attackTargets.RemoveAt(0);
+        }
+    }
+
+    private IEnumerator EvaluateStatusEffectBeforeAttack()
+    {
+        OrderStatusEffects();
+        List<BaseClass.StatusEffect> unitStatusEffects = new List<BaseClass.StatusEffect>();
+        unitStatusEffects.AddRange(attackerClass.activeStatusEffects);
+        foreach (BaseClass.StatusEffect activeStatus in unitStatusEffects)
+        {
+            switch (activeStatus)
+            {
+                case BaseClass.StatusEffect.Confused:
+                    if (Random.Range(0, 100) < 33)  ///chance to remove status
+                    {
+                        attackerClass.activeStatusEffects.Remove(BaseClass.StatusEffect.Confused);
+                        yield return StartCoroutine(uiHandler.ShowStatusRemovedDescription(BaseClass.StatusEffect.Confused));
+                    }
+                    else
+                    {
+                        if (Random.Range(0, 100) < 33)  ///chance to attack randomly
+                        {
+                            actionsToPerform[0].attack = attackerClass.confusedAttack;
+                            actionsToPerform[0].attackTargets.Clear();
+                            if (Random.Range(0, 2) == 0)
+                            {
+                                actionsToPerform[0].attackTargets.Add(playerTeam[Random.Range(0, playerTeam.Count)]);
+                            }
+                            else
+                            {
+                                actionsToPerform[0].attackTargets.Add(enemyTeam[Random.Range(0, enemyTeam.Count)]);
+                            }
+                            yield return StartCoroutine(uiHandler.ShowStatusEffectActionDescription(BaseClass.StatusEffect.Confused, true));
+                        }
+                        else
+                        {
+                            yield return StartCoroutine(uiHandler.ShowStatusEffectActionDescription(BaseClass.StatusEffect.Confused, true));
+                        }
+                    } 
+                    break;
+                case BaseClass.StatusEffect.Paralyzed:
+                    if (Random.Range(0, 100) < 33)  ///chance to remove status
+                    {
+                        attackerClass.activeStatusEffects.Remove(BaseClass.StatusEffect.Paralyzed);
+                        yield return StartCoroutine(uiHandler.ShowStatusRemovedDescription(BaseClass.StatusEffect.Paralyzed));
+                    }
+                    else
+                    {
+                        if (Random.Range(0, 100) < 50)  ///chance to not perform the action
+                        {
+                            yield return StartCoroutine(uiHandler.ShowStatusEffectActionDescription(BaseClass.StatusEffect.Paralyzed, false));
+                            actionsToPerform.RemoveAt(0);
+                            yield break;
+                        }
+                        else yield return StartCoroutine(uiHandler.ShowStatusEffectActionDescription(BaseClass.StatusEffect.Paralyzed, true));
+                    }
+                    break;
+                case BaseClass.StatusEffect.Provoked:
+                    if (Random.Range(0, 100) < 33)  ///chance to remove status
+                    {
+                        attackerClass.activeStatusEffects.Remove(BaseClass.StatusEffect.Provoked);
+                        yield return StartCoroutine(uiHandler.ShowStatusRemovedDescription(BaseClass.StatusEffect.Provoked));
+                    }
+                    else
+                    {
+                        actionsToPerform[0].attackTargets.Clear();
+                        actionsToPerform[0].attackTargets.Add(attackerClass.provokerGO);    ///the provoke status effect makes the multi target attacks single target
+                        yield return StartCoroutine(uiHandler.ShowStatusEffectActionDescription(BaseClass.StatusEffect.Provoked, true));
+                    }
+                    break;
+                case BaseClass.StatusEffect.Stunned:
+                    yield return StartCoroutine(uiHandler.ShowStatusEffectActionDescription(BaseClass.StatusEffect.Stunned, false));    ///stunned attacker cant perform the attack in this turn
+                    yield return StartCoroutine(uiHandler.ShowStatusRemovedDescription(BaseClass.StatusEffect.Stunned));                ///and then the stunned status effect ends
+                    attackerClass.activeStatusEffects.Remove(BaseClass.StatusEffect.Stunned);
+                    actionsToPerform.RemoveAt(0);
+                    yield break;
+                case BaseClass.StatusEffect.Asleep:
+                    if (Random.Range(0, 100) < 33)  ///chance to wake up
+                    {
+                        attackerClass.activeStatusEffects.Remove(BaseClass.StatusEffect.Asleep);
+                        yield return StartCoroutine(uiHandler.ShowStatusRemovedDescription(BaseClass.StatusEffect.Asleep));
+                    }
+                    else
+                    {
+                        yield return StartCoroutine(uiHandler.ShowStatusEffectActionDescription(BaseClass.StatusEffect.Asleep, false));
+                        actionsToPerform.RemoveAt(0);
+                        yield break;
+                    }
+                    break;
+            }
+        }
+        yield return StartCoroutine(uiHandler.ShowActionDescription(actionsToPerform[0]));
+        //qui andrebbe una coroutine per far muovere l'attaccante verso il target
+        yield return StartCoroutine(PerformAttack()); ///once all status effects have been evaluated if it did not stop the attack, it performs.
+        actionsToPerform.RemoveAt(0);
+    }
+
+    private void OrderStatusEffects() 
+    {
+        if (attackerClass.activeStatusEffects.Contains(BaseClass.StatusEffect.Poisoned))
+        {
+            attackerClass.activeStatusEffects.Remove(BaseClass.StatusEffect.Poisoned);
+            attackerClass.activeStatusEffects.Insert(0, BaseClass.StatusEffect.Poisoned);
+        }
+        if (attackerClass.activeStatusEffects.Contains(BaseClass.StatusEffect.Burned))
+        {
+            attackerClass.activeStatusEffects.Remove(BaseClass.StatusEffect.Burned);
+            attackerClass.activeStatusEffects.Insert(0, BaseClass.StatusEffect.Burned);
+        }
+        if (attackerClass.activeStatusEffects.Contains(BaseClass.StatusEffect.Paralyzed))
+        {
+            attackerClass.activeStatusEffects.Remove(BaseClass.StatusEffect.Paralyzed);
+            attackerClass.activeStatusEffects.Insert(0, BaseClass.StatusEffect.Paralyzed);
+        }
+        if (attackerClass.activeStatusEffects.Contains(BaseClass.StatusEffect.Confused))
+        {
+            attackerClass.activeStatusEffects.Remove(BaseClass.StatusEffect.Confused);
+            attackerClass.activeStatusEffects.Insert(0, BaseClass.StatusEffect.Confused);
+        }
+        if (attackerClass.activeStatusEffects.Contains(BaseClass.StatusEffect.Provoked))
+        {
+            attackerClass.activeStatusEffects.Remove(BaseClass.StatusEffect.Provoked);
+            attackerClass.activeStatusEffects.Insert(0, BaseClass.StatusEffect.Provoked);
+        }
+        if (attackerClass.activeStatusEffects.Contains(BaseClass.StatusEffect.Asleep))
+        {
+            attackerClass.activeStatusEffects.Remove(BaseClass.StatusEffect.Asleep);
+            attackerClass.activeStatusEffects.Insert(0, BaseClass.StatusEffect.Asleep);
+        }
+        if (attackerClass.activeStatusEffects.Contains(BaseClass.StatusEffect.Stunned))
+        {
+            attackerClass.activeStatusEffects.Remove(BaseClass.StatusEffect.Stunned);
+            attackerClass.activeStatusEffects.Insert(0, BaseClass.StatusEffect.Stunned);
+        }
+    } ///this sorts the status effect so that they get evaluated in the order i want
+
+    private IEnumerator EvaluateStatusEffectAfterAttack()
+    {
+        unitsClasses.Clear();
+        foreach (GameObject unit in playerTeam)
+        {
+            unitsClasses.Add(unit.GetComponent<BaseClass>());
+        }
+        foreach (GameObject unit in enemyTeam)
+        {
+            unitsClasses.Add(unit.GetComponent<BaseClass>());
+        }
+        foreach(BaseClass unitClass in unitsClasses)
+        {
+            foreach(BaseClass.StatusEffect activeStatus in unitClass.activeStatusEffects)
+            {
+                switch (activeStatus)
+                {
+                    ///I must explicit the type of status effect because in the foreach loop it finds also the other status effects like Asleep, Provoke etc.
+                    case BaseClass.StatusEffect.Burned:
+                        yield return StartCoroutine(unitClass.TakeStatusEffectDamage(activeStatus));
+                        break;
+                    case BaseClass.StatusEffect.Poisoned:
+                        yield return StartCoroutine(unitClass.TakeStatusEffectDamage(activeStatus));
+                        break;
+                }
+            } 
+        }
+    }
+
+    private int CalculateDamage(int atkDmg, int unitAtk)
+    {
+        return atkDmg + unitAtk; //da tweakare
+    }
+    #endregion
 }

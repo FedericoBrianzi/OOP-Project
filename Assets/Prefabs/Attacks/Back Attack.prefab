@@ -48,9 +48,11 @@ MonoBehaviour:
   attackDamage: 20
   attackManaCost: 15
   statBuffQuantity: 0
-  statNerfQuantity: 10
+  statNerfQuantity: 0
+  statusSuccessRate: 20
   ignoreArmor: 1
-  defendPose: 0
   numberOfTargets: 0
   buffedStat: 6
-  nerfedStat: 3
+  nerfedStat: 6
+  attackType: 5
+  statusChange: 3

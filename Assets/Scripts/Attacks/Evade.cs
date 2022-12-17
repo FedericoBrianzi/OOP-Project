@@ -2,14 +2,14 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Dodge : BaseAttack
+public class Evade : BaseAttack
 {
-    public Dodge()
+    public Evade()
     {
-        attackName = "Dodge";
+        attackName = "Evade";
         attackDamage = 0;
         attackManaCost = 5;
-        statBuffQuantity = 35;
+        statBuffQuantity = 25;
         statNerfQuantity = 0;
         statusSuccessRate = 0;
 

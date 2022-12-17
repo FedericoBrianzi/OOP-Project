@@ -18,24 +18,31 @@ public class HandleUI : MonoBehaviour
     [SerializeField] private GameObject targetPanel;
     [SerializeField] private GameObject unitNameText;
 
-    [Header("Attack input")]
+    [Header("Attack buttons")]
     [SerializeField] private List<GameObject> attackButtons = new List<GameObject>();
     [SerializeField] private GameObject attackButtonsHolder;
     [SerializeField] private GameObject attackButtonPrefab;
 
-    [Header("Target input")]
+    [Header("Target buttons")]
     [SerializeField] private List<GameObject> targetButtons = new List<GameObject>();
     [SerializeField] private GameObject targetButtonsHolder;
     [SerializeField] private GameObject targetButtonPrefab;
 
+    [Header("Action Description")]
+    [SerializeField] private GameObject actionDescriptionPanel;
+    private TextMeshProUGUI actionText;
+
     private BattleStateMachine BSM;
     private List<GameObject> unitsOnField = new List<GameObject>();
+
+    private BaseClass heroClass;
 
 
     private void Awake()
     {
         GameManager.OnGameStateChanged += GameManagerOnGameStateChanged;
         BSM = GameObject.Find("BattleManager").GetComponent<BattleStateMachine>();
+        actionText = actionDescriptionPanel.transform.GetChild(0).GetComponent<TextMeshProUGUI>();
     }
 
     private void GameManagerOnGameStateChanged(GameManager.GameState state)
@@ -56,20 +63,21 @@ public class HandleUI : MonoBehaviour
         int i = 0;
         foreach(GameObject unitUI in teamsStatsUI)
         {
-            unitUI.transform.GetChild(0).GetComponent<TextMeshProUGUI>().text = unitsOnField[i].GetComponent<BaseClass>().name; //da problemi quando una unita verra distrutta
+            unitUI.transform.GetChild(0).GetComponent<TextMeshProUGUI>().text = unitsOnField[i].GetComponent<BaseClass>().unitName; //da problemi quando una unita verra distrutta
             unitUI.transform.GetChild(1).GetComponent<TextMeshProUGUI>().text = "HP: " + unitsOnField[i].GetComponent<BaseClass>().currentHealth + " / " + unitsOnField[i].GetComponent<BaseClass>().maxHealth;
             unitUI.transform.GetChild(2).GetComponent<TextMeshProUGUI>().text = "MP: " + unitsOnField[i].GetComponent<BaseClass>().currentMana + " / " + unitsOnField[i].GetComponent<BaseClass>().maxMana;
             i++;
         }
     }
 
-    public void ActivateActionPanel(GameObject hero)  //shows the player's current unit name and creates the attack buttons for that unit
+    #region PlayerUI
+    public void ActivateActionPanel(GameObject hero)  ///shows the player's current unit name and creates the attack buttons for that unit
     {
         actionPanel.SetActive(true);
         attackButtons.Clear();
-        BaseClass heroClass = hero.GetComponent<BaseClass>();
+        heroClass = hero.GetComponent<BaseClass>();
 
-        unitNameText.GetComponent<TextMeshProUGUI>().text = heroClass.name;
+        unitNameText.GetComponent<TextMeshProUGUI>().text = heroClass.unitName;
 
         foreach (BaseAttack attack in heroClass.attacks)
         {
@@ -80,8 +88,16 @@ public class HandleUI : MonoBehaviour
             atkButton.transform.GetChild(0).GetComponent<TextMeshProUGUI>().text = attack.attackName;
             atkButton.GetComponent<AttackButton>().buttonAttack = attack;
             atkButton.GetComponent<Button>().onClick.AddListener(() => BSM.AttackInput(attack));
+            if (heroClass.activeStatusEffects.Contains(BaseClass.StatusEffect.Provoked))
+            {
+                if (attack.numberOfTargets == BaseAttack.typeOfTarget.SingleEnemyTarget || attack.numberOfTargets == BaseAttack.typeOfTarget.MultiEnemyTargets || attack.numberOfTargets == BaseAttack.typeOfTarget.AllEnemyTargets) { }
+                else atkButton.GetComponent<Button>().interactable = false;
+            }
+            if(attack.attackManaCost > heroClass.currentMana)
+            {
+                atkButton.GetComponent<Button>().interactable = false;
+            }
         }
-
     }
 
     public void DeactivateActionPanel()
@@ -103,9 +119,16 @@ public class HandleUI : MonoBehaviour
             targetButton.transform.SetParent(targetButtonsHolder.transform, false);
             targetButtons.Add(targetButton);
 
-            targetButton.transform.GetChild(0).GetComponent<TextMeshProUGUI>().text = target.GetComponent<BaseClass>().name;
+            targetButton.transform.GetChild(0).GetComponent<TextMeshProUGUI>().text = target.GetComponent<BaseClass>().unitName;
             targetButton.GetComponent<TargetButton>().buttonTarget = target.GetComponent<BaseClass>();
             targetButton.GetComponent<Button>().onClick.AddListener(() => BSM.TargetInput(target));
+            if (heroClass.activeStatusEffects.Contains(BaseClass.StatusEffect.Provoked))
+            {
+                if(target != heroClass.provokerGO)
+                {
+                    targetButton.GetComponent<Button>().interactable = false;
+                }
+            }
         }
     }
 
@@ -119,8 +142,15 @@ public class HandleUI : MonoBehaviour
             targetButton.transform.SetParent(targetButtonsHolder.transform, false);
             targetButtons.Add(targetButton);
 
-            targetButton.transform.GetChild(0).GetComponent<TextMeshProUGUI>().text = target.GetComponent<BaseClass>().name;
+            targetButton.transform.GetChild(0).GetComponent<TextMeshProUGUI>().text = target.GetComponent<BaseClass>().unitName;
             targetButton.GetComponent<TargetButton>().buttonTarget = target.GetComponent<BaseClass>();
+            if (heroClass.activeStatusEffects.Contains(BaseClass.StatusEffect.Provoked))
+            {
+                if (target != heroClass.provokerGO)
+                {
+                    targetButton.GetComponent<Button>().interactable = false;
+                }
+            }
         }
 
         if (targets.Length == 1)
@@ -172,4 +202,213 @@ public class HandleUI : MonoBehaviour
             Destroy(button); //vorrei disattivarli e riatttivarli
         }
     }
+    #endregion
+
+    #region PerformActionUI
+    ///Action description
+    public IEnumerator ShowActionDescription(HandleTurn action)
+    {
+        actionDescriptionPanel.SetActive(true);
+        if (action.attack.GetComponent<BaseAttack>().attackType == BaseAttack.typeOfAttack.Defend)
+        {
+            actionText.text = action.attackerName + " defends himself";
+            yield return new WaitForSeconds(2);
+        }
+        else if (action.attackTargets.Count == 1 && action.attackTargets[0] == action.attackerGO)
+        {
+            actionText.text = action.attackerName + " uses " + action.attack.attackName + " on himself";
+            yield return new WaitForSeconds(2);
+        }
+        else if (action.attackTargets.Count == 1)
+        {
+            actionText.text = action.attackerName + " uses " + action.attack.attackName + " on " + action.attackTargets[0].GetComponent<BaseClass>().unitName + ".";
+            yield return new WaitForSeconds(2);
+        }
+        else if (action.attackTargets.Contains(BSM.enemyTeam[0]) && action.attackTargets.Contains(BSM.enemyTeam[1]) && action.attackTargets.Contains(BSM.enemyTeam[2]))//si bugga quando muoiono
+        {
+            actionText.text = action.attackerName + " uses " + action.attack.attackName + " on the other team.";
+            yield return new WaitForSeconds(2);
+        }
+        else if (action.attackTargets.Contains(BSM.playerTeam[0]) && action.attackTargets.Contains(BSM.playerTeam[1]) && action.attackTargets.Contains(BSM.playerTeam[2]))//si bugga quando muoiono
+        {
+            actionText.text = action.attackerName + " uses " + action.attack.attackName + " on his team.";
+            yield return new WaitForSeconds(2);
+        }
+        else 
+        {
+            actionText.text = action.attackerName + " uses " + action.attack.attackName + " on " + action.attackTargets[0].GetComponent<BaseClass>().unitName + " and " + action.attackTargets[1].GetComponent<BaseClass>().unitName + ".";
+            yield return new WaitForSeconds(2);
+        } 
+    }
+
+    ///Damage descriptions
+    public IEnumerator ShowDamageTakenDescription(int damageTaken)
+    {
+        actionDescriptionPanel.SetActive(true);
+        actionText.text = BSM.actionsToPerform[0].attackTargets[0].GetComponent<BaseClass>().unitName + " takes " + damageTaken + " damage.";
+        yield return new WaitForSeconds(2);
+    }
+
+    public IEnumerator ShowDamageTakenDescription(bool dodged)
+    {
+        actionDescriptionPanel.SetActive(true);
+        if(dodged) actionText.text = BSM.actionsToPerform[0].attackTargets[0].GetComponent<BaseClass>().unitName + " dodges the attack."; ///the bool check is not required
+        yield return new WaitForSeconds(2);
+    }   ///dodge
+
+    public IEnumerator ShowStatusDamageDescription(BaseClass.StatusEffect status, int damage, string unitName)
+    {
+        actionDescriptionPanel.SetActive(true);
+        switch (status)
+        {
+            case BaseClass.StatusEffect.Burned:
+                actionText.text = unitName + " suffers from his burn and takes " + damage + " damage.";
+                yield return new WaitForSeconds(2);
+                break;
+            case BaseClass.StatusEffect.Poisoned:
+                actionText.text = unitName + " suffers from his poison and takes " + damage + " damage.";
+                yield return new WaitForSeconds(2);
+                break;
+        }
+    }
+
+    ///Stat description
+    public IEnumerator ShowStatChangeDescription(BaseAttack.modifiedStat stat, int changeValue, bool isBuff)
+    {
+        actionDescriptionPanel.SetActive(true);
+        if (isBuff)
+        {
+            actionText.text = BSM.actionsToPerform[0].attackTargets[0].GetComponent<BaseClass>().unitName + "'s " + stat + " goes up by " + changeValue + ".";
+            yield return new WaitForSeconds(2);
+        }
+        else
+        {
+            actionText.text = BSM.actionsToPerform[0].attackTargets[0].GetComponent<BaseClass>().unitName + "'s " + stat + " goes down by " + changeValue + ".";
+            yield return new WaitForSeconds(2);
+        }
+    }
+
+    ///Status descriptions
+    public IEnumerator ShowStatusEffectActionDescription(BaseClass.StatusEffect activeStatus, bool canAttack)
+    {
+        actionDescriptionPanel.SetActive(true);
+        switch (activeStatus)
+        {
+            case BaseClass.StatusEffect.Asleep:
+                actionText.text = BSM.actionsToPerform[0].attackerName + " is sleeping and cannot attack.";
+                yield return new WaitForSeconds(2);
+                break;
+            case BaseClass.StatusEffect.Confused:
+                actionText.text = BSM.actionsToPerform[0].attackerName + " is confused..";
+                yield return new WaitForSeconds(2);
+                break;
+            case BaseClass.StatusEffect.Paralyzed:
+                if (canAttack)
+                {
+                    actionText.text = BSM.actionsToPerform[0].attackerName + " is paralyzed..";
+                    yield return new WaitForSeconds(2);
+                }
+                else
+                {
+                    actionText.text = BSM.actionsToPerform[0].attackerName + " is paralyzed..";
+                    yield return new WaitForSeconds(2);
+                    actionText.text = BSM.actionsToPerform[0].attackerName + " is not able to move.";
+                    yield return new WaitForSeconds(2);
+                }
+                break;
+            case BaseClass.StatusEffect.Provoked:
+                actionText.text = BSM.actionsToPerform[0].attackerName + " is provoked by " + BSM.actionsToPerform[0].attackerGO.GetComponent<BaseClass>().provokerGO.GetComponent<BaseClass>().unitName + ".";
+                yield return new WaitForSeconds(2);
+                break;
+            case BaseClass.StatusEffect.Stunned:
+                actionText.text = BSM.actionsToPerform[0].attackerName + " is stunned and cannot move.";
+                yield return new WaitForSeconds(2);
+                break;
+        }
+        yield return null;
+    }
+
+    public IEnumerator ShowStatusTakenDescription(BaseClass.StatusEffect status)
+    {
+        actionDescriptionPanel.SetActive(true);
+        switch (status)
+        {
+            case BaseClass.StatusEffect.Asleep:
+                actionText.text = BSM.actionsToPerform[0].attackTargets[0].GetComponent<BaseClass>().unitName + " falls asleep.";
+                yield return new WaitForSeconds(2);
+                break;
+            case BaseClass.StatusEffect.Burned:
+                actionText.text = BSM.actionsToPerform[0].attackTargets[0].GetComponent<BaseClass>().unitName + " was burned.";
+                yield return new WaitForSeconds(2);
+                break;
+            case BaseClass.StatusEffect.Confused:
+                actionText.text = BSM.actionsToPerform[0].attackTargets[0].GetComponent<BaseClass>().unitName + " was confused.";
+                yield return new WaitForSeconds(2);
+                break;
+            case BaseClass.StatusEffect.Paralyzed:
+                actionText.text = BSM.actionsToPerform[0].attackTargets[0].GetComponent<BaseClass>().unitName + " was paralyzed.";
+                yield return new WaitForSeconds(2);
+                break;
+            case BaseClass.StatusEffect.Poisoned:
+                actionText.text = BSM.actionsToPerform[0].attackTargets[0].GetComponent<BaseClass>().unitName + " was poisoned.";
+                yield return new WaitForSeconds(2);
+                break;
+            case BaseClass.StatusEffect.Stunned:
+                actionText.text = BSM.actionsToPerform[0].attackTargets[0].GetComponent<BaseClass>().unitName + " was stunned.";
+                yield return new WaitForSeconds(2);
+                break;
+        }
+    }
+
+    public IEnumerator ShowStatusTakenDescription(BaseClass.StatusEffect status, GameObject provoker)
+    {
+        actionDescriptionPanel.SetActive(true);
+        actionText.text = BSM.actionsToPerform[0].attackTargets[0].GetComponent<BaseClass>().unitName + " is provoked by " + provoker.GetComponent<BaseClass>().unitName + ".";
+        yield return new WaitForSeconds(2);
+    }   ///only for provoke
+
+    public IEnumerator ShowStatusRemovedDescription(BaseClass.StatusEffect status)
+    {
+        actionDescriptionPanel.SetActive(true);
+        switch (status)
+        {
+            case BaseClass.StatusEffect.Asleep:
+                actionText.text = BSM.actionsToPerform[0].attackTargets[0].GetComponent<BaseClass>().unitName + " wakes up.";
+                yield return new WaitForSeconds(2);
+                break;
+            case BaseClass.StatusEffect.Burned:
+                actionText.text = BSM.actionsToPerform[0].attackTargets[0].GetComponent<BaseClass>().unitName + " is no longer burned.";
+                yield return new WaitForSeconds(2);
+                break;
+            case BaseClass.StatusEffect.Confused:
+                actionText.text = BSM.actionsToPerform[0].attackTargets[0].GetComponent<BaseClass>().unitName + " is no longer confused.";
+                yield return new WaitForSeconds(2);
+                break;
+            case BaseClass.StatusEffect.Paralyzed:
+                actionText.text = BSM.actionsToPerform[0].attackTargets[0].GetComponent<BaseClass>().unitName + " is no longer paralyzed.";
+                yield return new WaitForSeconds(2);
+                break;
+            case BaseClass.StatusEffect.Poisoned:
+                actionText.text = BSM.actionsToPerform[0].attackTargets[0].GetComponent<BaseClass>().unitName + " is no longer poisoned.";
+                yield return new WaitForSeconds(2);
+                break;
+            case BaseClass.StatusEffect.Provoked:
+                actionText.text = BSM.actionsToPerform[0].attackTargets[0].GetComponent<BaseClass>().unitName + " is no longer provoked.";
+                yield return new WaitForSeconds(2);
+                break;
+            case BaseClass.StatusEffect.Stunned:
+                actionText.text = BSM.actionsToPerform[0].attackTargets[0].GetComponent<BaseClass>().unitName + " is no longer stunned.";
+                yield return new WaitForSeconds(2);
+                break;
+        }
+    }
+
+    ///Hide 
+    public void HideActionDescription()
+    {
+        actionDescriptionPanel.SetActive(false);
+    }
+    #endregion
 }
+
+

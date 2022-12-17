@@ -47,10 +47,12 @@ MonoBehaviour:
   attackName: Enrage
   attackDamage: 0
   attackManaCost: 10
-  statBuffQuantity: 40
-  statNerfQuantity: 30
+  statBuffQuantity: 25
+  statNerfQuantity: 10
+  statusSuccessRate: 0
   ignoreArmor: 0
   numberOfTargets: 3
   buffedStat: 2
   nerfedStat: 3
   attackType: 2
+  statusChange: 7

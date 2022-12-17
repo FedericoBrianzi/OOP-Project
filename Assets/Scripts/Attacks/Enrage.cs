@@ -9,8 +9,8 @@ public class Enrage : BaseAttack
         attackName = "Enrage";
         attackDamage = 0;
         attackManaCost = 10;
-        statBuffQuantity = 40;
-        statNerfQuantity = 30;
+        statBuffQuantity = 25;
+        statNerfQuantity = 10;
         statusSuccessRate = 0;
 
         ignoreArmor = false;
