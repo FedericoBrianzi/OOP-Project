@@ -15,7 +15,7 @@ public class Fireball : BaseAttack
 
         ignoreArmor = false;
 
-        numberOfTargets = typeOfTarget.MultiEnemyTargets;
+        numberOfTargets = typeOfTarget.AllEnemyTargets;
         buffedStat = modifiedStat.NONE;
         nerfedStat = modifiedStat.NONE;
         attackType = typeOfAttack.DmgAndStatus;

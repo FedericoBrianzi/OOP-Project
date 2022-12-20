@@ -257,7 +257,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 633845688722728983}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: -5296652060191710894}
+        m_TargetAssemblyTypeName: TargetButton, Assembly-CSharp
+        m_MethodName: HideIndicator
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &-5296652060191710894
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -271,3 +283,5 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   buttonTarget: {fileID: 0}
+  redMaterial: {fileID: 2100000, guid: 9fc91c2d4d50b2f428e837b43b1f4386, type: 2}
+  yellowMaterial: {fileID: 2100000, guid: 0b84b7d0caac2244cbdcf4fc614fa0d0, type: 2}

@@ -27,6 +27,8 @@ public abstract class BaseClass : MonoBehaviour
     private HandleUI uiHandler;
 
     protected bool isDefending = false;
+
+    private bool dodgedTheAttack = false;
     public enum StatusEffect
     {
         Burned,
@@ -61,7 +63,10 @@ public abstract class BaseClass : MonoBehaviour
                 yield return StartCoroutine(TakeDamage(totalDamage, attack.ignoreArmor));
                 if (gameObject.TryGetComponent(out Berserk berserk) && currentHealth <= Mathf.RoundToInt(maxHealth / 3))
                 {
-                    activeStatusEffects.Add(StatusEffect.BerserkWrath);
+                    if (!activeStatusEffects.Contains(StatusEffect.BerserkWrath))
+                    {
+                        activeStatusEffects.Add(StatusEffect.BerserkWrath);
+                    }
                 }
                 break;
             case BaseAttack.typeOfAttack.Defend:
@@ -72,45 +77,75 @@ public abstract class BaseClass : MonoBehaviour
                 break;
             case BaseAttack.typeOfAttack.DmgAndStatChange:
                 yield return StartCoroutine(TakeDamage(totalDamage, attack.ignoreArmor));
-                yield return StartCoroutine(ChangeStat(attack.buffedStat, attack.nerfedStat, attack.statBuffQuantity, attack.statNerfQuantity));
+                if (!dodgedTheAttack)
+                {
+                    yield return StartCoroutine(ChangeStat(attack.buffedStat, attack.nerfedStat, attack.statBuffQuantity, attack.statNerfQuantity));
+                }
                 break;
             case BaseAttack.typeOfAttack.Status:
                 yield return StartCoroutine(ApplyStatusEffect(attack.statusChange, attack.statusSuccessRate, attacker));
                 break;
             case BaseAttack.typeOfAttack.DmgAndStatus:
-                yield return StartCoroutine(TakeDamage(totalDamage, attack.ignoreArmor)); //devo evitare che cambi status o stat se l'attacco viene dodgiato
-                yield return StartCoroutine(ApplyStatusEffect(attack.statusChange, attack.statusSuccessRate, attacker));
+                yield return StartCoroutine(TakeDamage(totalDamage, attack.ignoreArmor));
+                if (!dodgedTheAttack)
+                {
+                    yield return StartCoroutine(ApplyStatusEffect(attack.statusChange, attack.statusSuccessRate, attacker));
+                }
                 break;
-        };
+        }
     }
 
     public virtual IEnumerator TakeDamage(int damage, bool ignoreArmor)
     {
         if (Random.Range(0, 100) < currentEvasion)
         {
-            yield return StartCoroutine(uiHandler.ShowDamageTakenDescription(true));
+            dodgedTheAttack = true;
+            yield return StartCoroutine(uiHandler.ShowDamageTakenDescription(dodgedTheAttack));
             yield break;
         }
+        else dodgedTheAttack = false;
 
-        int damageTaken = currentHealth;
+        int damageTaken;
         if (ignoreArmor)
         {
             if (isDefending)
             {
-                currentHealth -= damage / 2;
-                if(currentHealth < 0)
+                damageTaken = damage / 2;
+                currentHealth -= damageTaken;
+                yield return StartCoroutine(uiHandler.ShowDamageTakenDescription(damageTaken));
+                if (currentHealth < 0)
                 {
                     currentHealth = 0;
-                    //Add death interactions
+                    if (gameObject.CompareTag("Player"))
+                    {
+                        yield return StartCoroutine(GetComponent<PlayerStateMachine>().DeadPlayerRoutine());
+                        GetComponent<PlayerStateMachine>().currentState = PlayerStateMachine.TurnState.DEAD;
+                    }
+                    else
+                    {
+                        yield return StartCoroutine(GetComponent<EnemyStateMachine>().DeadEnemyRoutine());
+                        GetComponent<EnemyStateMachine>().currentState = EnemyStateMachine.TurnState.DEAD;
+                    }
                 }
             }
             else
             {
-                currentHealth -= damage;
+                damageTaken = damage;
+                currentHealth -= damageTaken;
+                yield return StartCoroutine(uiHandler.ShowDamageTakenDescription(damageTaken));
                 if (currentHealth < 0)
                 {
                     currentHealth = 0;
-                    //Add death interactions
+                    if (gameObject.CompareTag("Player"))
+                    {
+                        yield return StartCoroutine(GetComponent<PlayerStateMachine>().DeadPlayerRoutine());
+                        GetComponent<PlayerStateMachine>().currentState = PlayerStateMachine.TurnState.DEAD;
+                    }
+                    else
+                    {
+                        yield return StartCoroutine(GetComponent<EnemyStateMachine>().DeadEnemyRoutine());
+                        GetComponent<EnemyStateMachine>().currentState = EnemyStateMachine.TurnState.DEAD;
+                    }
                 }
             }
         }
@@ -118,25 +153,47 @@ public abstract class BaseClass : MonoBehaviour
         {
             if (isDefending) 
             {
-                currentHealth -= (damage - currentArmor) / 2;
+                damageTaken = (damage - currentArmor) / 2;
+                currentHealth -= damageTaken;
+                yield return StartCoroutine(uiHandler.ShowDamageTakenDescription(damageTaken));
                 if (currentHealth < 0)
                 {
                     currentHealth = 0;
-                    //Add death interactions
+                    if (gameObject.CompareTag("Player"))
+                    {
+                        yield return StartCoroutine(GetComponent<PlayerStateMachine>().DeadPlayerRoutine());
+                        GetComponent<PlayerStateMachine>().currentState = PlayerStateMachine.TurnState.DEAD;
+                    }
+                    else
+                    {
+                        yield return StartCoroutine(GetComponent<EnemyStateMachine>().DeadEnemyRoutine());
+                        GetComponent<EnemyStateMachine>().currentState = EnemyStateMachine.TurnState.DEAD;
+                    } 
+                       
                 }
             }
             else
             {
-                currentHealth -= (damage - currentArmor);
+                damageTaken = (damage - currentArmor);
+                currentHealth -= damageTaken;
+                yield return StartCoroutine(uiHandler.ShowDamageTakenDescription(damageTaken));
                 if (currentHealth < 0)
                 {
                     currentHealth = 0;
-                    //Add death interactions
+                    if (gameObject.CompareTag("Player"))
+                    {
+                        yield return StartCoroutine(GetComponent<PlayerStateMachine>().DeadPlayerRoutine());
+                        GetComponent<PlayerStateMachine>().currentState = PlayerStateMachine.TurnState.DEAD;
+                    }
+                    else
+                    {
+                        yield return StartCoroutine(GetComponent<EnemyStateMachine>().DeadEnemyRoutine());
+                        GetComponent<EnemyStateMachine>().currentState = EnemyStateMachine.TurnState.DEAD;
+                    }
                 }
             }   
         }
-        damageTaken -= currentHealth;
-        yield return StartCoroutine(uiHandler.ShowDamageTakenDescription(damageTaken));
+        
     }
 
     public virtual IEnumerator ChangeStat(BaseAttack.modifiedStat statToBuff, BaseAttack.modifiedStat statToNerf, int buff, int nerf)
@@ -306,12 +363,12 @@ public abstract class BaseClass : MonoBehaviour
         switch (status)
         {
             case StatusEffect.Burned:
-                currentHealth -= Mathf.RoundToInt(currentHealth * 5 / 100);
-                yield return StartCoroutine(uiHandler.ShowStatusDamageDescription(StatusEffect.Burned, Mathf.RoundToInt(currentHealth * 5 / 100), unitName));
+                currentHealth -= Mathf.RoundToInt(maxHealth * 10 / 100);
+                yield return StartCoroutine(uiHandler.ShowStatusDamageDescription(StatusEffect.Burned, Mathf.RoundToInt(maxHealth * 10 / 100), this));
                 break;
             case StatusEffect.Poisoned:
-                currentHealth -= Mathf.RoundToInt(currentHealth * 10 / 100);
-                yield return StartCoroutine(uiHandler.ShowStatusDamageDescription(StatusEffect.Poisoned, Mathf.RoundToInt(currentHealth * 10 / 100), unitName));
+                currentHealth -= Mathf.RoundToInt(maxHealth * 15 / 100);
+                yield return StartCoroutine(uiHandler.ShowStatusDamageDescription(StatusEffect.Poisoned, Mathf.RoundToInt(maxHealth * 15 / 100), this));
                 break;
         }
     }

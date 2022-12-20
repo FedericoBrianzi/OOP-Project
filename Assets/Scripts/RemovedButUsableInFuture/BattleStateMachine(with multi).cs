@@ -6,7 +6,7 @@ using UnityEngine.UI;
 using TMPro;
 using Random = UnityEngine.Random;
 
-public class BattleStateMachine : MonoBehaviour
+public class BattleStateMachineMulti : MonoBehaviour
 {
     public List<GameObject> playerTeam { get; private set; } = new List<GameObject>();
     public List<GameObject> enemyTeam { get; private set; } = new List<GameObject>();
@@ -126,11 +126,6 @@ public class BattleStateMachine : MonoBehaviour
         }
     }
 
-    public BaseClass GetHeroToManageClass()
-    {
-        return heroesToManage[0].GetComponent<BaseClass>();
-    }
-
     #region Player HandleTurn Methods
     public void AddHeroToList(GameObject pUnit)
     {
@@ -154,10 +149,10 @@ public class BattleStateMachine : MonoBehaviour
         }
     }
 
-    public void TargetInput(GameObject target)
-    {                                            
-        uiHandler.DeactivateTargetPanel();   
-        heroAction.attackTargets.Add(target);   
+    public void TargetInput(GameObject target)      //TargetInput e MultiTargetInput possono forse essere condensati in un solo metodo se entrambi prendono come parametro
+    {                                               //una lista di GameObject e all'aggiunta dei target c'è un check sul numero di oggetti nella lista
+        uiHandler.DeactivateTargetPanel();          //TargetInput prende solo l'elemento 0 e MultiTargetInput li prende tutti.
+        heroAction.attackTargets.Add(target);       //Così facendo posso richiamare quest'unica funzione anche da SelectTarget nei casi AllEnemy/AllAlly/Self.
         heroesToManage[0].GetComponent<BaseClass>().indicator.SetActive(false);
         actionsToPerform.Add(heroAction);
         heroesToManage.RemoveAt(0);
@@ -182,6 +177,12 @@ public class BattleStateMachine : MonoBehaviour
                 targetsToManage.AddRange(enemyTeam);
                 break;
 
+            //case BaseAttack.typeOfTarget.MultiEnemyTargets:
+            //    isTargetSelected = true;
+            //    targetsToManage.AddRange(enemyTeam);
+            //    uiHandler.ActivateMultiTargetPanel(targetsToManage.ToArray(), heroAction.attack);
+            //    break;
+
             case BaseAttack.typeOfTarget.AllEnemyTargets:
                 isTargetSelected = true;
                 heroAction.attackTargets.AddRange(enemyTeam);
@@ -194,6 +195,12 @@ public class BattleStateMachine : MonoBehaviour
             case BaseAttack.typeOfTarget.SingleAllyTarget:
                 targetsToManage.AddRange(playerTeam);
                 break;
+
+            //case BaseAttack.typeOfTarget.MultiAllyTargets:
+            //    isTargetSelected = true;
+            //    targetsToManage.AddRange(playerTeam);
+            //    uiHandler.ActivateMultiTargetPanel(targetsToManage.ToArray(), heroAction.attack);
+            //    break;
 
             case BaseAttack.typeOfTarget.AllAllyTargets:
                 isTargetSelected = true;
@@ -434,9 +441,17 @@ public class BattleStateMachine : MonoBehaviour
                 case BaseAttack.typeOfTarget.SingleAllyTarget:
                     action.attackTargets.Add(action.attackerGO);
                     break;
-
                 case BaseAttack.typeOfTarget.SingleEnemyTarget:
                     action.attackTargets.Add(enemyTeam[Random.Range(0, enemyTeam.Count)]);
+                    break;
+                //case BaseAttack.typeOfTarget.MultiAllyTargets:
+                //    if(playerTeam.Count == 2)
+                //    {
+
+                //    }
+                //    break;
+                case BaseAttack.typeOfTarget.AllAllyTargets:
+                    ///I already removed the dead ally in the PlayerStateMachine
                     break;
             }
         }

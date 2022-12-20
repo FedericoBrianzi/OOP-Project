@@ -5,7 +5,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 
-public class HandleUI : MonoBehaviour
+public class HandleUIMulti : MonoBehaviour
 {
     [Header("Team Selection Phase")]
     [SerializeField] private GameObject teamsSelectPanel;
@@ -17,7 +17,6 @@ public class HandleUI : MonoBehaviour
     [SerializeField] private GameObject actionPanel;
     [SerializeField] private GameObject targetPanel;
     [SerializeField] private GameObject unitNameText;
-    [SerializeField] private GameObject targetTeamText;
 
     [Header("Attack buttons")]
     [SerializeField] private List<GameObject> attackButtons = new List<GameObject>();
@@ -38,55 +37,11 @@ public class HandleUI : MonoBehaviour
 
     private BaseClass heroClass;
 
-    public List<TextMeshProUGUI> nameTexts, hpTexts, mpTexts = new List<TextMeshProUGUI>();
 
-    [System.Serializable]
-    public class unitInfo
-    {
-        BaseClass unitClass;
-        string nameInBattle;
-        string prefix;
-
-        public unitInfo (BaseClass unit, string name)
-        {
-            unitClass = unit;
-            nameInBattle = name;
-            prefix = "";
-        }
-        
-        public BaseClass GetBaseClass()
-        {
-            return unitClass;
-        }
-
-        public string GetName()
-        {
-            return nameInBattle; 
-        }
-
-        public string GetNameAndPrefix()
-        {
-            return prefix + nameInBattle;
-        }
-
-        public void SetNameSuffix(string suffix)
-        {
-            nameInBattle += suffix;
-        }
-
-        public void AddEnemyPrefix()
-        {
-            prefix = "Enemy ";
-        }
-    }
-    
-    public List<unitInfo> unitIdentifiers = new List<unitInfo>();
-    
     private void Awake()
     {
         GameManager.OnGameStateChanged += GameManagerOnGameStateChanged;
         BSM = GameObject.Find("BattleManager").GetComponent<BattleStateMachine>();
-
         actionText = actionDescriptionPanel.transform.GetChild(0).GetComponent<TextMeshProUGUI>();
     }
 
@@ -95,102 +50,25 @@ public class HandleUI : MonoBehaviour
         teamsSelectPanel.SetActive(state == GameManager.GameState.PickTeams);
 
         battlePanel.SetActive(state == GameManager.GameState.BattleStart);
-        
         if (state == GameManager.GameState.BattleStart)
         {
-            for (int i = 0; i < teamsStatsUI.Length; i++)
-            {
-                nameTexts.Insert(i, teamsStatsUI[i].transform.GetChild(0).GetComponent<TextMeshProUGUI>());
-                hpTexts.Insert(i, teamsStatsUI[i].transform.GetChild(1).GetComponent<TextMeshProUGUI>());
-                mpTexts.Insert(i, teamsStatsUI[i].transform.GetChild(2).GetComponent<TextMeshProUGUI>());
-            }
-
             unitsOnField.AddRange(BSM.playerTeam);
-            foreach (GameObject unit in BSM.playerTeam)
-            {
-                unitInfo unitID = new unitInfo(unit.GetComponent<BaseClass>(), unit.GetComponent<BaseClass>().unitName);
-                unitIdentifiers.Add(unitID);
-            }
-
             unitsOnField.AddRange(BSM.enemyTeam);
-            foreach (GameObject unit in BSM.enemyTeam)
-            {
-                unitInfo unitID = new unitInfo(unit.GetComponent<BaseClass>(), unit.GetComponent<BaseClass>().unitName);
-                unitID.AddEnemyPrefix();
-                unitIdentifiers.Add(unitID);
-            }
-
-            CheckForSuffix();   ///Same names in same team will get a "(2)", "(3)" suffix
             UpdateBattleUI();
-        }
-    }
-
-    private void CheckForSuffix()
-    {
-        int pCounter = 2;
-        if (unitIdentifiers[0].GetName() == unitIdentifiers[1].GetName())
-        {
-            unitIdentifiers[1].SetNameSuffix("(" + pCounter + ")");
-            pCounter++;
-        }
-        if (unitIdentifiers[0].GetName() == unitIdentifiers[2].GetName())
-        {
-            unitIdentifiers[2].SetNameSuffix("(" + pCounter + ")");
-        }
-        else if (unitIdentifiers[1].GetName() == unitIdentifiers[2].GetName())
-        {
-            unitIdentifiers[2].SetNameSuffix("(" + pCounter + ")");
-        }
-
-        int eCounter = 2;
-        if (unitIdentifiers[3].GetName() == unitIdentifiers[4].GetName())
-        {
-            unitIdentifiers[4].SetNameSuffix("(" + eCounter + ")");
-            eCounter++;
-        }
-        if (unitIdentifiers[3].GetName() == unitIdentifiers[5].GetName())
-        {
-            unitIdentifiers[5].SetNameSuffix("(" + eCounter + ")");
-        }
-        else if (unitIdentifiers[4].GetName() == unitIdentifiers[5].GetName())
-        {
-            unitIdentifiers[5].SetNameSuffix("(" + eCounter + ")");
         }
     }
 
     public void UpdateBattleUI()    ///shows current stats for every unit
     {
-        for (int i = 0; i < teamsStatsUI.Length; i++)
+        int i = 0;
+        foreach(GameObject unitUI in teamsStatsUI)
         {
-            nameTexts[i].text = unitIdentifiers[i].GetName();
-            hpTexts[i].text = "HP: " + unitIdentifiers[i].GetBaseClass().currentHealth + " / " + unitIdentifiers[i].GetBaseClass().maxHealth;
-            mpTexts[i].text = "MP: " + unitIdentifiers[i].GetBaseClass().currentMana + " / " + unitIdentifiers[i].GetBaseClass().maxMana;
+            unitUI.transform.GetChild(0).GetComponent<TextMeshProUGUI>().text = unitsOnField[i].GetComponent<BaseClass>().unitName; //da problemi quando una unita verra distrutta
+            unitUI.transform.GetChild(1).GetComponent<TextMeshProUGUI>().text = "HP: " + unitsOnField[i].GetComponent<BaseClass>().currentHealth + " / " + unitsOnField[i].GetComponent<BaseClass>().maxHealth;
+            unitUI.transform.GetChild(2).GetComponent<TextMeshProUGUI>().text = "MP: " + unitsOnField[i].GetComponent<BaseClass>().currentMana + " / " + unitsOnField[i].GetComponent<BaseClass>().maxMana;
+            i++;
         }
     }
-
-    public string GetFullNameFromBase(BaseClass classToCheck)
-    {
-        foreach (unitInfo info in unitIdentifiers)
-        {
-            if (classToCheck == info.GetBaseClass())
-            {
-                return info.GetNameAndPrefix();
-            }
-        }
-        return "";
-    }   ///gives back prefix(if present), name and suffix(if present)
-
-    public string GetNameWithSuffixFromBase(BaseClass classToCheck)
-    {
-        foreach (unitInfo info in unitIdentifiers)
-        {
-            if (classToCheck == info.GetBaseClass())
-            {
-                return info.GetName();
-            }
-        }
-        return "";
-    }   ///gives back name and suffix(if present)
 
     #region PlayerUI
     public void ActivateActionPanel(GameObject hero)  ///shows the player's current unit name and creates the attack buttons for that unit
@@ -199,7 +77,7 @@ public class HandleUI : MonoBehaviour
         attackButtons.Clear();
         heroClass = hero.GetComponent<BaseClass>();
 
-        unitNameText.GetComponent<TextMeshProUGUI>().text = GetFullNameFromBase(heroClass);
+        unitNameText.GetComponent<TextMeshProUGUI>().text = heroClass.unitName;
 
         foreach (BaseAttack attack in heroClass.attacks)
         {
@@ -235,20 +113,13 @@ public class HandleUI : MonoBehaviour
     {
         targetPanel.SetActive(true);
         targetButtons.Clear();
-
-        if (targets[0].CompareTag("Enemy"))
-        {
-            targetTeamText.GetComponent<TextMeshProUGUI>().text = "Select enemy";
-        }
-        else targetTeamText.GetComponent<TextMeshProUGUI>().text = "Select ally";
-
         foreach (GameObject target in targets)
         {
             GameObject targetButton = Instantiate(targetButtonPrefab);
             targetButton.transform.SetParent(targetButtonsHolder.transform, false);
             targetButtons.Add(targetButton);
 
-            targetButton.transform.GetChild(0).GetComponent<TextMeshProUGUI>().text = GetNameWithSuffixFromBase(target.GetComponent<BaseClass>());
+            targetButton.transform.GetChild(0).GetComponent<TextMeshProUGUI>().text = target.GetComponent<BaseClass>().unitName;
             targetButton.GetComponent<TargetButton>().buttonTargetClass = target.GetComponent<BaseClass>();
             targetButton.GetComponent<TargetButton>().setTargetType(heroAttack.numberOfTargets);
             targetButton.GetComponent<Button>().onClick.AddListener(() => BSM.TargetInput(target));
@@ -260,6 +131,69 @@ public class HandleUI : MonoBehaviour
                 }
             }
         }
+    }
+
+    public void ActivateMultiTargetPanel(GameObject[] targets, BaseAttack heroAttack) 
+    {
+        targetPanel.SetActive(true);
+        targetButtons.Clear();
+        foreach (GameObject target in targets)
+        {
+            GameObject targetButton = Instantiate(targetButtonPrefab);
+            targetButton.transform.SetParent(targetButtonsHolder.transform, false);
+            targetButtons.Add(targetButton);
+
+            targetButton.transform.GetChild(0).GetComponent<TextMeshProUGUI>().text = target.GetComponent<BaseClass>().unitName;
+            targetButton.GetComponent<TargetButton>().buttonTargetClass = target.GetComponent<BaseClass>();
+            targetButton.GetComponent<TargetButton>().setTargetType(heroAttack.numberOfTargets);
+            if (heroClass.activeStatusEffects.Contains(BaseClass.StatusEffect.Provoked))
+            {
+                if (target != heroClass.provokerGO)
+                {
+                    targetButton.GetComponent<Button>().interactable = false;
+                }
+            }
+        }
+
+        if (targets.Length == 1)
+        {
+            targetButtons[0].GetComponent<Button>().onClick.AddListener(() => BSM.TargetInput(targets[0]));
+        }
+        else if (targets.Length == 3)
+        {
+            targetButtons[0].GetComponent<Button>().onClick.AddListener(() => BSM.MultiTargetInput(SetMultiTargets(0).ToArray()));
+            targetButtons[1].GetComponent<Button>().onClick.AddListener(() => BSM.MultiTargetInput(SetMultiTargets(1).ToArray()));
+            targetButtons[2].GetComponent<Button>().onClick.AddListener(() => BSM.MultiTargetInput(SetMultiTargets(2).ToArray()));
+        }
+        else
+        {
+            foreach(GameObject targetButton in targetButtons)
+            {
+                targetButton.GetComponent<Button>().onClick.AddListener(() => BSM.MultiTargetInput(targets));
+            }
+        }
+    }
+
+    private List<GameObject> SetMultiTargets(int buttonIndex)
+    {
+        List<GameObject> targets = new List<GameObject>();
+        if (buttonIndex == 0)
+        {
+            targets.Add(targetButtons[0].GetComponent<TargetButton>().buttonTargetClass.gameObject);
+            targets.Add(targetButtons[1].GetComponent<TargetButton>().buttonTargetClass.gameObject);
+        }
+        else if (buttonIndex == 1)
+        {
+            targets.Add(targetButtons[0].GetComponent<TargetButton>().buttonTargetClass.gameObject);
+            targets.Add(targetButtons[1].GetComponent<TargetButton>().buttonTargetClass.gameObject);
+            targets.Add(targetButtons[2].GetComponent<TargetButton>().buttonTargetClass.gameObject);
+        }
+        else
+        {
+            targets.Add(targetButtons[1].GetComponent<TargetButton>().buttonTargetClass.gameObject);
+            targets.Add(targetButtons[2].GetComponent<TargetButton>().buttonTargetClass.gameObject);
+        }
+        return targets;
     }
 
     public void DeactivateTargetPanel()
@@ -277,31 +211,32 @@ public class HandleUI : MonoBehaviour
     public IEnumerator ShowActionDescription(HandleTurn action)
     {
         actionDescriptionPanel.SetActive(true);
-        BaseClass attackerClass = action.attackerGO.GetComponent<BaseClass>();
+        if (action.attackerGO.CompareTag("Enemy")) actionText.text = "Enemy ";  //non basta: enemy mage uses x on mage, mage uses x on (enemy non si legge) mage
+        else actionText.text = "";
 
         if (action.attack.attackType == BaseAttack.typeOfAttack.Defend)
         {
-            actionText.text = GetFullNameFromBase(attackerClass) + " defends himself";
+            actionText.text += action.attackerName + " defends himself";
             yield return new WaitForSeconds(2);
         }
         else if (action.attackTargets.Count == 1 && action.attackTargets[0] == action.attackerGO)
         {
-            actionText.text = GetFullNameFromBase(attackerClass) + " uses " + action.attack.attackName + " on himself";
+            actionText.text += action.attackerName + " uses " + action.attack.attackName + " on himself";
             yield return new WaitForSeconds(2);
         }
         else if (action.attackTargets.Count == 1)
         {
-            actionText.text = GetFullNameFromBase(attackerClass) + " uses " + action.attack.attackName + " on " + GetFullNameFromBase(action.attackTargets[0].GetComponent<BaseClass>()) + ".";
+            actionText.text += action.attackerName + " uses " + action.attack.attackName + " on " + action.attackTargets[0].GetComponent<BaseClass>().unitName + ".";
             yield return new WaitForSeconds(2);
         }
         else if (action.attackTargets.Count == BSM.playerTeam.Count && action.attackTargets[0].gameObject.CompareTag("Player"))
         {
-            actionText.text = GetFullNameFromBase(attackerClass) + " uses " + action.attack.attackName + " on player's team.";
+            actionText.text += action.attackerName + " uses " + action.attack.attackName + " on player's team.";
             yield return new WaitForSeconds(2);
         }
         else if (action.attackTargets.Count == BSM.enemyTeam.Count && action.attackTargets[0].gameObject.CompareTag("Enemy"))
         {
-            actionText.text = action.attackerName + " uses " + action.attack.attackName + " on enemy team.";
+            actionText.text += action.attackerName + " uses " + action.attack.attackName + " on enemy team.";
             yield return new WaitForSeconds(2);
         }
     }
@@ -310,7 +245,7 @@ public class HandleUI : MonoBehaviour
     public IEnumerator ShowDamageTakenDescription(int damageTaken)
     {
         actionDescriptionPanel.SetActive(true);
-        actionText.text = GetFullNameFromBase(BSM.actionsToPerform[0].attackTargets[0].GetComponent<BaseClass>()) + " takes " + damageTaken + " damage.";
+        actionText.text = BSM.actionsToPerform[0].attackTargets[0].GetComponent<BaseClass>().unitName + " takes " + damageTaken + " damage.";
         UpdateBattleUI();
         yield return new WaitForSeconds(2);
     }
@@ -318,23 +253,23 @@ public class HandleUI : MonoBehaviour
     public IEnumerator ShowDamageTakenDescription(bool dodged)
     {
         actionDescriptionPanel.SetActive(true);
-        if(dodged) actionText.text = GetFullNameFromBase(BSM.actionsToPerform[0].attackTargets[0].GetComponent<BaseClass>()) + " dodges the attack."; ///the bool check is not required
+        if(dodged) actionText.text = BSM.actionsToPerform[0].attackTargets[0].GetComponent<BaseClass>().unitName + " dodges the attack."; ///the bool check is not required
         UpdateBattleUI();
         yield return new WaitForSeconds(2);
     }   ///dodge
 
-    public IEnumerator ShowStatusDamageDescription(BaseClass.StatusEffect status, int damage, BaseClass unitClass)
+    public IEnumerator ShowStatusDamageDescription(BaseClass.StatusEffect status, int damage, string unitName)
     {
         actionDescriptionPanel.SetActive(true);
         switch (status)
         {
             case BaseClass.StatusEffect.Burned:
-                actionText.text = GetFullNameFromBase(unitClass) + " suffers from his burn and takes " + damage + " damage.";
+                actionText.text = unitName + " suffers from his burn and takes " + damage + " damage.";
                 UpdateBattleUI();
                 yield return new WaitForSeconds(2);
                 break;
             case BaseClass.StatusEffect.Poisoned:
-                actionText.text = GetFullNameFromBase(unitClass) + " suffers from his poison and takes " + damage + " damage.";
+                actionText.text = unitName + " suffers from his poison and takes " + damage + " damage.";
                 UpdateBattleUI();
                 yield return new WaitForSeconds(2);
                 break;
@@ -347,12 +282,12 @@ public class HandleUI : MonoBehaviour
         actionDescriptionPanel.SetActive(true);
         if (isBuff)
         {
-            actionText.text = GetFullNameFromBase(BSM.actionsToPerform[0].attackTargets[0].GetComponent<BaseClass>()) + "'s " + stat + " goes up by " + changeValue + ".";
+            actionText.text = BSM.actionsToPerform[0].attackTargets[0].GetComponent<BaseClass>().unitName + "'s " + stat + " goes up by " + changeValue + ".";
             yield return new WaitForSeconds(2);
         }
         else
         {
-            actionText.text = GetFullNameFromBase(BSM.actionsToPerform[0].attackTargets[0].GetComponent<BaseClass>()) + "'s " + stat + " goes down by " + changeValue + ".";
+            actionText.text = BSM.actionsToPerform[0].attackTargets[0].GetComponent<BaseClass>().unitName + "'s " + stat + " goes down by " + changeValue + ".";
             yield return new WaitForSeconds(2);
         }
     }
@@ -361,37 +296,36 @@ public class HandleUI : MonoBehaviour
     public IEnumerator ShowStatusEffectActionDescription(BaseClass.StatusEffect activeStatus, bool canAttack)
     {
         actionDescriptionPanel.SetActive(true);
-        BaseClass attackerClass = BSM.actionsToPerform[0].attackerGO.GetComponent<BaseClass>();
         switch (activeStatus)
         {
             case BaseClass.StatusEffect.Asleep:
-                actionText.text = GetFullNameFromBase(attackerClass) + " is sleeping and cannot attack.";
+                actionText.text = BSM.actionsToPerform[0].attackerName + " is sleeping and cannot attack.";
                 yield return new WaitForSeconds(2);
                 break;
             case BaseClass.StatusEffect.Confused:
-                actionText.text = GetFullNameFromBase(attackerClass) + " is confused..";
+                actionText.text = BSM.actionsToPerform[0].attackerName + " is confused..";
                 yield return new WaitForSeconds(2);
                 break;
             case BaseClass.StatusEffect.Paralyzed:
                 if (canAttack)
                 {
-                    actionText.text = GetFullNameFromBase(attackerClass) + " is paralyzed..";
+                    actionText.text = BSM.actionsToPerform[0].attackerName + " is paralyzed..";
                     yield return new WaitForSeconds(2);
                 }
                 else
                 {
-                    actionText.text = GetFullNameFromBase(attackerClass) + " is paralyzed..";
+                    actionText.text = BSM.actionsToPerform[0].attackerName + " is paralyzed..";
                     yield return new WaitForSeconds(2);
-                    actionText.text = GetFullNameFromBase(attackerClass) + " is not able to move.";
+                    actionText.text = BSM.actionsToPerform[0].attackerName + " is not able to move.";
                     yield return new WaitForSeconds(2);
                 }
                 break;
             case BaseClass.StatusEffect.Provoked:
-                actionText.text = GetFullNameFromBase(attackerClass) + " is provoked by " + GetFullNameFromBase(attackerClass.provokerGO.GetComponent<BaseClass>()) + ".";
+                actionText.text = BSM.actionsToPerform[0].attackerName + " is provoked by " + BSM.actionsToPerform[0].attackerGO.GetComponent<BaseClass>().provokerGO.GetComponent<BaseClass>().unitName + ".";
                 yield return new WaitForSeconds(2);
                 break;
             case BaseClass.StatusEffect.Stunned:
-                actionText.text = GetFullNameFromBase(attackerClass) + " is stunned and cannot move.";
+                actionText.text = BSM.actionsToPerform[0].attackerName + " is stunned and cannot move.";
                 yield return new WaitForSeconds(2);
                 break;
         }
@@ -401,31 +335,30 @@ public class HandleUI : MonoBehaviour
     public IEnumerator ShowStatusTakenDescription(BaseClass.StatusEffect status)
     {
         actionDescriptionPanel.SetActive(true);
-        BaseClass targetClass = BSM.actionsToPerform[0].attackTargets[0].GetComponent<BaseClass>();
         switch (status)
         {
             case BaseClass.StatusEffect.Asleep:
-                actionText.text = GetFullNameFromBase(targetClass) + " falls asleep.";
+                actionText.text = BSM.actionsToPerform[0].attackTargets[0].GetComponent<BaseClass>().unitName + " falls asleep.";
                 yield return new WaitForSeconds(2);
                 break;
             case BaseClass.StatusEffect.Burned:
-                actionText.text = GetFullNameFromBase(targetClass) + " was burned.";
+                actionText.text = BSM.actionsToPerform[0].attackTargets[0].GetComponent<BaseClass>().unitName + " was burned.";
                 yield return new WaitForSeconds(2);
                 break;
             case BaseClass.StatusEffect.Confused:
-                actionText.text = GetFullNameFromBase(targetClass) + " was confused.";
+                actionText.text = BSM.actionsToPerform[0].attackTargets[0].GetComponent<BaseClass>().unitName + " was confused.";
                 yield return new WaitForSeconds(2);
                 break;
             case BaseClass.StatusEffect.Paralyzed:
-                actionText.text = GetFullNameFromBase(targetClass) + " was paralyzed.";
+                actionText.text = BSM.actionsToPerform[0].attackTargets[0].GetComponent<BaseClass>().unitName + " was paralyzed.";
                 yield return new WaitForSeconds(2);
                 break;
             case BaseClass.StatusEffect.Poisoned:
-                actionText.text = GetFullNameFromBase(targetClass) + " was poisoned.";
+                actionText.text = BSM.actionsToPerform[0].attackTargets[0].GetComponent<BaseClass>().unitName + " was poisoned.";
                 yield return new WaitForSeconds(2);
                 break;
             case BaseClass.StatusEffect.Stunned:
-                actionText.text = GetFullNameFromBase(targetClass) + " was stunned.";
+                actionText.text = BSM.actionsToPerform[0].attackTargets[0].GetComponent<BaseClass>().unitName + " was stunned.";
                 yield return new WaitForSeconds(2);
                 break;
         }
@@ -434,42 +367,41 @@ public class HandleUI : MonoBehaviour
     public IEnumerator ShowStatusTakenDescription(BaseClass.StatusEffect status, GameObject provoker)
     {
         actionDescriptionPanel.SetActive(true);
-        actionText.text = GetFullNameFromBase(BSM.actionsToPerform[0].attackTargets[0].GetComponent<BaseClass>()) + " is provoked by " + GetFullNameFromBase(provoker.GetComponent<BaseClass>()) + ".";
+        actionText.text = BSM.actionsToPerform[0].attackTargets[0].GetComponent<BaseClass>().unitName + " is provoked by " + provoker.GetComponent<BaseClass>().unitName + ".";
         yield return new WaitForSeconds(2);
     }   ///only for provoke
 
     public IEnumerator ShowStatusRemovedDescription(BaseClass.StatusEffect status)
     {
         actionDescriptionPanel.SetActive(true);
-        BaseClass attackerClass = BSM.actionsToPerform[0].attackerGO.GetComponent<BaseClass>();
         switch (status)
         {
             case BaseClass.StatusEffect.Asleep:
-                actionText.text = GetFullNameFromBase(attackerClass) + " wakes up.";
+                actionText.text = BSM.actionsToPerform[0].attackerName + " wakes up.";
                 yield return new WaitForSeconds(2);
                 break;
             case BaseClass.StatusEffect.Burned:
-                actionText.text = GetFullNameFromBase(attackerClass) + " is no longer burned.";
+                actionText.text = BSM.actionsToPerform[0].attackerName + " is no longer burned.";
                 yield return new WaitForSeconds(2);
                 break;
             case BaseClass.StatusEffect.Confused:
-                actionText.text = GetFullNameFromBase(attackerClass) + " is no longer confused.";
+                actionText.text = BSM.actionsToPerform[0].attackerName + " is no longer confused.";
                 yield return new WaitForSeconds(2);
                 break;
             case BaseClass.StatusEffect.Paralyzed:
-                actionText.text = GetFullNameFromBase(attackerClass) + " is no longer paralyzed.";
+                actionText.text = BSM.actionsToPerform[0].attackerName + " is no longer paralyzed.";
                 yield return new WaitForSeconds(2);
                 break;
             case BaseClass.StatusEffect.Poisoned:
-                actionText.text = GetFullNameFromBase(attackerClass) + " is no longer poisoned.";
+                actionText.text = BSM.actionsToPerform[0].attackerName + " is no longer poisoned.";
                 yield return new WaitForSeconds(2);
                 break;
             case BaseClass.StatusEffect.Provoked:
-                actionText.text = GetFullNameFromBase(attackerClass) + " is no longer provoked.";
+                actionText.text = BSM.actionsToPerform[0].attackerName + " is no longer provoked.";
                 yield return new WaitForSeconds(2);
                 break;
             case BaseClass.StatusEffect.Stunned:
-                actionText.text = GetFullNameFromBase(attackerClass) + " is no longer stunned.";
+                actionText.text = BSM.actionsToPerform[0].attackerName + " is no longer stunned.";
                 yield return new WaitForSeconds(2);
                 break;
         }

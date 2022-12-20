@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
-public class EnemyStateMachine : MonoBehaviour
+public class EnemyStateMachineMulti : MonoBehaviour
 {
     private BattleStateMachine BSM;
     private BaseClass myClass;
@@ -92,7 +92,7 @@ public class EnemyStateMachine : MonoBehaviour
         List<BaseAttack> attacksForEnemies = new List<BaseAttack>();
         foreach (BaseAttack attack in myClass.attacks)
         {
-            if(attack.numberOfTargets == BaseAttack.typeOfTarget.SingleEnemyTarget || attack.numberOfTargets == BaseAttack.typeOfTarget.AllEnemyTargets)
+            if(attack.numberOfTargets == BaseAttack.typeOfTarget.SingleEnemyTarget || /*attack.numberOfTargets == BaseAttack.typeOfTarget.MultiEnemyTargets ||*/ attack.numberOfTargets == BaseAttack.typeOfTarget.AllEnemyTargets)
             {
                 attacksForEnemies.Add(attack);
             }
@@ -118,6 +118,10 @@ public class EnemyStateMachine : MonoBehaviour
                 myAction.attackTargets.Add(BSM.playerTeam[Random.Range(0, BSM.playerTeam.Count)]);
                 break;
 
+            //case BaseAttack.typeOfTarget.MultiEnemyTargets:
+            //    SetMultiEnemyTargets(myAction);
+            //    break;
+
             case BaseAttack.typeOfTarget.AllEnemyTargets:
                 myAction.attackTargets.AddRange(BSM.playerTeam);
                 break;
@@ -126,6 +130,10 @@ public class EnemyStateMachine : MonoBehaviour
                 myAction.attackTargets.Add(BSM.enemyTeam[Random.Range(0, BSM.enemyTeam.Count)]);
                 break;
 
+            //case BaseAttack.typeOfTarget.MultiAllyTargets:
+            //    SetMultiAllyTargets(myAction);
+            //    break;
+
             case BaseAttack.typeOfTarget.AllAllyTargets:
                 myAction.attackTargets.AddRange(BSM.enemyTeam);
                 break;
@@ -133,6 +141,58 @@ public class EnemyStateMachine : MonoBehaviour
             case BaseAttack.typeOfTarget.Self:
                 myAction.attackTargets.Add(gameObject);
                 break;
+        }
+    }
+
+    private void SetMultiAllyTargets(HandleTurn myAttack)
+    {
+        if (Random.Range(0, BSM.enemyTeam.Count) == 0)
+        {
+            myAttack.attackTargets.Add(BSM.enemyTeam[0]);
+            if (BSM.enemyTeam.Count >= 2)
+            {
+                myAttack.attackTargets.Add(BSM.enemyTeam[1]);
+            }
+        }
+        else if (Random.Range(0, BSM.enemyTeam.Count) == BSM.enemyTeam.Count - 1)
+        {
+            myAttack.attackTargets.Add(BSM.enemyTeam[BSM.enemyTeam.Count - 1]);
+            if (BSM.enemyTeam.Count >= 2)
+            {
+                myAttack.attackTargets.Add(BSM.enemyTeam[BSM.enemyTeam.Count - 2]);
+            }
+        }
+        else
+        {
+            myAttack.attackTargets.Add(BSM.enemyTeam[0]);
+            myAttack.attackTargets.Add(BSM.enemyTeam[1]);
+            myAttack.attackTargets.Add(BSM.enemyTeam[2]);
+        }
+    }
+
+    private void SetMultiEnemyTargets(HandleTurn myAttack)
+    {
+        if (Random.Range(0, BSM.playerTeam.Count) == 0)
+        {
+            myAttack.attackTargets.Add(BSM.playerTeam[0]);
+            if (BSM.playerTeam.Count >= 2)
+            {
+                myAttack.attackTargets.Add(BSM.playerTeam[1]);
+            }
+        }
+        else if (Random.Range(0, BSM.playerTeam.Count) == BSM.playerTeam.Count - 1)
+        {
+            myAttack.attackTargets.Add(BSM.playerTeam[BSM.playerTeam.Count - 1]);
+            if (BSM.playerTeam.Count >= 2) //non servirebbe perche se ci fosse solo un nemico entreresti sempre nel primo if
+            {
+                myAttack.attackTargets.Add(BSM.playerTeam[BSM.playerTeam.Count - 2]);
+            }
+        }
+        else
+        {   //non ha bisogno di altre condizioni perche negli altri casi finiresti negli if precedenti
+            myAttack.attackTargets.Add(BSM.playerTeam[0]);
+            myAttack.attackTargets.Add(BSM.playerTeam[1]);
+            myAttack.attackTargets.Add(BSM.playerTeam[2]);
         }
     }
 
@@ -152,16 +212,16 @@ public class EnemyStateMachine : MonoBehaviour
             }
         }
 
-        for (int i = 0; i < BSM.actionsToPerform.Count; i++)
+        for (int i = 0; i < BSM.actionsToPerform.Count; i++)  ///I need to check from the next action because the action[0] is still performing and self removing this target at this point
         {
             if (BSM.actionsToPerform[i].attackTargets.Contains(gameObject))
             {
-                BSM.actionsToPerform[i].attackTargets.Remove(gameObject);
+                BSM.actionsToPerform[i].attackTargets.Remove(gameObject); //negli attacchi allTarget mi rimuove tutti i target
                 BSM.SetNewTarget(BSM.actionsToPerform[i]);
             }
         }
 
-        foreach (GameObject playerUnit in BSM.playerTeam)
+        foreach (GameObject playerUnit in BSM.playerTeam)//potrei doverlo mettere sopra al for sopra questo
         {
             if (playerUnit.GetComponent<BaseClass>().provokerGO == gameObject)
             {

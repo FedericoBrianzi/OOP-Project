@@ -1003,7 +1003,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ca24762e89cbab742b6f4990c99dde28, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  <actionsToPerform>k__BackingField: []
+  actionsToPerform: []
+  targetDied: 0
 --- !u!4 &288252061
 Transform:
   m_ObjectHideFlags: 0
@@ -3411,6 +3412,7 @@ MonoBehaviour:
   actionPanel: {fileID: 1986969816}
   targetPanel: {fileID: 1811984171}
   unitNameText: {fileID: 2104570561}
+  targetTeamText: {fileID: 289625459}
   attackButtons: []
   attackButtonsHolder: {fileID: 51948095}
   attackButtonPrefab: {fileID: 7464178869378525656, guid: 8dde4bdb2a07e954693e9f4f094b5876, type: 3}
@@ -3418,6 +3420,10 @@ MonoBehaviour:
   targetButtonsHolder: {fileID: 884823566}
   targetButtonPrefab: {fileID: 633845688722728978, guid: 67dbbbe83be81e54ebe0b8f8ca73e175, type: 3}
   actionDescriptionPanel: {fileID: 1233646200}
+  nameTexts: []
+  hpTexts: []
+  mpTexts: []
+  unitIdentifiers: []
 --- !u!1 &1066892197
 GameObject:
   m_ObjectHideFlags: 0
@@ -8404,7 +8410,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 8e85fad1e3c5ae8408a36a756fae14de, type: 2}
+  - {fileID: 2100000, guid: d03d1d98d147e16469f841082b82c73a, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0

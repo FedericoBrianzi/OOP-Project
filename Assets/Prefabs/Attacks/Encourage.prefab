@@ -51,7 +51,7 @@ MonoBehaviour:
   statNerfQuantity: 0
   statusSuccessRate: 0
   ignoreArmor: 0
-  numberOfTargets: 4
+  numberOfTargets: 3
   buffedStat: 2
   nerfedStat: 6
   attackType: 2
