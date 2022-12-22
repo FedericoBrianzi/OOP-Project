@@ -64,8 +64,8 @@ public class HandleUIMulti : MonoBehaviour
         foreach(GameObject unitUI in teamsStatsUI)
         {
             unitUI.transform.GetChild(0).GetComponent<TextMeshProUGUI>().text = unitsOnField[i].GetComponent<BaseClass>().unitName; //da problemi quando una unita verra distrutta
-            unitUI.transform.GetChild(1).GetComponent<TextMeshProUGUI>().text = "HP: " + unitsOnField[i].GetComponent<BaseClass>().currentHealth + " / " + unitsOnField[i].GetComponent<BaseClass>().maxHealth;
-            unitUI.transform.GetChild(2).GetComponent<TextMeshProUGUI>().text = "MP: " + unitsOnField[i].GetComponent<BaseClass>().currentMana + " / " + unitsOnField[i].GetComponent<BaseClass>().maxMana;
+            unitUI.transform.GetChild(1).GetComponent<TextMeshProUGUI>().text = "HP: " + unitsOnField[i].GetComponent<BaseClass>().GetCurrentHealth() + " / " + unitsOnField[i].GetComponent<BaseClass>().maxHealth;
+            unitUI.transform.GetChild(2).GetComponent<TextMeshProUGUI>().text = "MP: " + unitsOnField[i].GetComponent<BaseClass>().GetCurrentMana() + " / " + unitsOnField[i].GetComponent<BaseClass>().maxMana;
             i++;
         }
     }
@@ -93,7 +93,7 @@ public class HandleUIMulti : MonoBehaviour
                 if (attack.numberOfTargets == BaseAttack.typeOfTarget.SingleEnemyTarget || /*attack.numberOfTargets == BaseAttack.typeOfTarget.MultiEnemyTargets ||*/ attack.numberOfTargets == BaseAttack.typeOfTarget.AllEnemyTargets) { }
                 else atkButton.GetComponent<Button>().interactable = false;
             }
-            if(attack.attackManaCost > heroClass.currentMana)
+            if(attack.attackManaCost > heroClass.GetCurrentMana())
             {
                 atkButton.GetComponent<Button>().interactable = false;
             }
@@ -161,15 +161,15 @@ public class HandleUIMulti : MonoBehaviour
         }
         else if (targets.Length == 3)
         {
-            targetButtons[0].GetComponent<Button>().onClick.AddListener(() => BSM.MultiTargetInput(SetMultiTargets(0).ToArray()));
-            targetButtons[1].GetComponent<Button>().onClick.AddListener(() => BSM.MultiTargetInput(SetMultiTargets(1).ToArray()));
-            targetButtons[2].GetComponent<Button>().onClick.AddListener(() => BSM.MultiTargetInput(SetMultiTargets(2).ToArray()));
+            //targetButtons[0].GetComponent<Button>().onClick.AddListener(() => BSM.MultiTargetInput(SetMultiTargets(0).ToArray()));    //must be used with BSM with multi
+            //targetButtons[1].GetComponent<Button>().onClick.AddListener(() => BSM.MultiTargetInput(SetMultiTargets(1).ToArray()));
+            //targetButtons[2].GetComponent<Button>().onClick.AddListener(() => BSM.MultiTargetInput(SetMultiTargets(2).ToArray()));
         }
         else
         {
             foreach(GameObject targetButton in targetButtons)
             {
-                targetButton.GetComponent<Button>().onClick.AddListener(() => BSM.MultiTargetInput(targets));
+                //targetButton.GetComponent<Button>().onClick.AddListener(() => BSM.MultiTargetInput(targets));
             }
         }
     }

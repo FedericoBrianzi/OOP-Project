@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using UnityEngine.SceneManagement;
 
 public class HandleUI : MonoBehaviour
 {
@@ -23,15 +24,22 @@ public class HandleUI : MonoBehaviour
     [SerializeField] private List<GameObject> attackButtons = new List<GameObject>();
     [SerializeField] private GameObject attackButtonsHolder;
     [SerializeField] private GameObject attackButtonPrefab;
+    [SerializeField] private GameObject previousTurnButton;
 
     [Header("Target buttons")]
     [SerializeField] private List<GameObject> targetButtons = new List<GameObject>();
     [SerializeField] private GameObject targetButtonsHolder;
     [SerializeField] private GameObject targetButtonPrefab;
+    [SerializeField] private GameObject previousAttackButton;
 
     [Header("Action Description")]
     [SerializeField] private GameObject actionDescriptionPanel;
     private TextMeshProUGUI actionText;
+
+    [Header("Battle End Phase")]
+    [SerializeField] private GameObject battleEndPanel;
+    [SerializeField] private GameObject wonBattleText;
+    [SerializeField] private GameObject lostBattleText;
 
     private BattleStateMachine BSM;
     private List<GameObject> unitsOnField = new List<GameObject>();
@@ -123,6 +131,15 @@ public class HandleUI : MonoBehaviour
             CheckForSuffix();   ///Same names in same team will get a "(2)", "(3)" suffix
             UpdateBattleUI();
         }
+
+        battleEndPanel.SetActive(state == GameManager.GameState.BattleWon || state == GameManager.GameState.BattleWon);
+        wonBattleText.SetActive(state == GameManager.GameState.BattleWon);
+        lostBattleText.SetActive(state == GameManager.GameState.BattleLost);
+    }
+
+    private void OnDestroy()
+    {
+        GameManager.OnGameStateChanged -= GameManagerOnGameStateChanged;
     }
 
     private void CheckForSuffix()
@@ -163,8 +180,8 @@ public class HandleUI : MonoBehaviour
         for (int i = 0; i < teamsStatsUI.Length; i++)
         {
             nameTexts[i].text = unitIdentifiers[i].GetName();
-            hpTexts[i].text = "HP: " + unitIdentifiers[i].GetBaseClass().currentHealth + " / " + unitIdentifiers[i].GetBaseClass().maxHealth;
-            mpTexts[i].text = "MP: " + unitIdentifiers[i].GetBaseClass().currentMana + " / " + unitIdentifiers[i].GetBaseClass().maxMana;
+            hpTexts[i].text = "HP: " + unitIdentifiers[i].GetBaseClass().GetCurrentHealth() + " / " + unitIdentifiers[i].GetBaseClass().maxHealth;
+            mpTexts[i].text = "MP: " + unitIdentifiers[i].GetBaseClass().GetCurrentMana() + " / " + unitIdentifiers[i].GetBaseClass().maxMana;
         }
     }
 
@@ -193,11 +210,15 @@ public class HandleUI : MonoBehaviour
     }   ///gives back name and suffix(if present)
 
     #region PlayerUI
-    public void ActivateActionPanel(GameObject hero)  ///shows the player's current unit name and creates the attack buttons for that unit
+    public void ActivateActionPanel(GameObject hero) 
     {
         actionPanel.SetActive(true);
         attackButtons.Clear();
         heroClass = hero.GetComponent<BaseClass>();
+
+        previousTurnButton.SetActive(true);
+        if (hero == BSM.playerTeam[0]) previousTurnButton.GetComponent<Button>().interactable = false;
+        else previousTurnButton.GetComponent<Button>().interactable = true;
 
         unitNameText.GetComponent<TextMeshProUGUI>().text = GetFullNameFromBase(heroClass);
 
@@ -212,15 +233,15 @@ public class HandleUI : MonoBehaviour
             atkButton.GetComponent<Button>().onClick.AddListener(() => BSM.AttackInput(attack));
             if (heroClass.activeStatusEffects.Contains(BaseClass.StatusEffect.Provoked))
             {
-                if (attack.numberOfTargets == BaseAttack.typeOfTarget.SingleEnemyTarget || /*attack.numberOfTargets == BaseAttack.typeOfTarget.MultiEnemyTargets ||*/ attack.numberOfTargets == BaseAttack.typeOfTarget.AllEnemyTargets) { }
+                if (attack.numberOfTargets == BaseAttack.typeOfTarget.SingleEnemyTarget || attack.numberOfTargets == BaseAttack.typeOfTarget.AllEnemyTargets) { }
                 else atkButton.GetComponent<Button>().interactable = false;
             }
-            if(attack.attackManaCost > heroClass.currentMana)
+            if(attack.attackManaCost > heroClass.GetCurrentMana())
             {
                 atkButton.GetComponent<Button>().interactable = false;
             }
         }
-    }
+    }    ///shows the player's current unit name and creates the attack buttons for that unit
 
     public void DeactivateActionPanel()
     {
@@ -235,6 +256,8 @@ public class HandleUI : MonoBehaviour
     {
         targetPanel.SetActive(true);
         targetButtons.Clear();
+
+        previousAttackButton.SetActive(true);
 
         if (targets[0].CompareTag("Enemy"))
         {
@@ -398,7 +421,7 @@ public class HandleUI : MonoBehaviour
         yield return null;
     }
 
-    public IEnumerator ShowStatusTakenDescription(BaseClass.StatusEffect status)
+    public IEnumerator ShowStatusTakenDescription(BaseClass.StatusEffect status) 
     {
         actionDescriptionPanel.SetActive(true);
         BaseClass targetClass = BSM.actionsToPerform[0].attackTargets[0].GetComponent<BaseClass>();
@@ -473,6 +496,13 @@ public class HandleUI : MonoBehaviour
                 yield return new WaitForSeconds(2);
                 break;
         }
+    }
+
+    public IEnumerator ShowDeadUnitDescription(BaseClass targetClass)
+    {
+        actionDescriptionPanel.SetActive(true);
+        actionText.text = GetFullNameFromBase(targetClass) + " fainted.";
+        yield return new WaitForSeconds(2);
     }
 
     ///Hide 

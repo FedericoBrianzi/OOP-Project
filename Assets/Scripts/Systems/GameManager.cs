@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class GameManager : MonoBehaviour
 {
@@ -10,6 +11,14 @@ public class GameManager : MonoBehaviour
     public GameState State;
 
     public static event Action<GameState> OnGameStateChanged;
+
+    public enum GameState
+    {
+        PickTeams,
+        BattleStart,
+        BattleWon,
+        BattleLost
+    }
 
     private void Awake()
     {
@@ -31,16 +40,12 @@ public class GameManager : MonoBehaviour
                 break;
             case GameState.BattleStart:
                 break;
-            case GameState.BattleEnd:
-                HandleBattleEnd();
+            case GameState.BattleWon:
+                break;
+            case GameState.BattleLost:
                 break;
         }
-        OnGameStateChanged?.Invoke(newState); //if the game state changes, the event is sent with the newState
-    }
-
-    private void HandleBattleEnd()
-    {
-        //throw new NotImplementedException();
+        OnGameStateChanged?.Invoke(newState); ///if the game state changes, the event is sent with the newState
     }
 
     public void StartBattle()
@@ -48,10 +53,18 @@ public class GameManager : MonoBehaviour
         UpdateGameState(GameState.BattleStart);
     }
 
-    public enum GameState
+    public void EndBattle(bool won)
     {
-        PickTeams,
-        BattleStart,
-        BattleEnd
+        if(won) UpdateGameState(GameState.BattleWon);
+        else UpdateGameState(GameState.BattleLost);
+    }
+    public void RestartGame()
+    {
+        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+    }
+
+    public void QuitGame()
+    {
+        Application.Quit();
     }
 }

@@ -253,7 +253,7 @@ public class BattleStateMachineMulti : MonoBehaviour
     private IEnumerator PerformAttack()
     {
         attackerClass.SubtractMana(actionsToPerform[0].attack.attackManaCost);
-        int damageTotal = CalculateDamage(actionsToPerform[0].attack.attackDamage, attackerClass.currentAttack);
+        int damageTotal = CalculateDamage(actionsToPerform[0].attack.attackDamage, attackerClass.GetCurrentAttack());
         while(actionsToPerform[0].attackTargets.Count != 0)
         {
             yield return StartCoroutine(actionsToPerform[0].attackTargets[0].GetComponent<BaseClass>().EvaluateAttack(actionsToPerform[0].attack, damageTotal, actionsToPerform[0].attackerGO));

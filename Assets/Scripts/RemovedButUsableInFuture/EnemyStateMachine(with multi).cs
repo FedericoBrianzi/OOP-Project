@@ -105,7 +105,7 @@ public class EnemyStateMachineMulti : MonoBehaviour
         List<BaseAttack> usableAttacks = new List<BaseAttack>();
         foreach(BaseAttack attack in attacksToCheck)
         {
-            if (attack.attackManaCost <= myClass.currentMana) usableAttacks.Add(attack);
+            if (attack.attackManaCost <= myClass.GetCurrentMana()) usableAttacks.Add(attack);
         }
         return usableAttacks;
     }
@@ -201,7 +201,7 @@ public class EnemyStateMachineMulti : MonoBehaviour
         gameObject.tag = "DeadEnemy";
 
         BSM.enemyTeam.Remove(gameObject);
-        BSM.targetDied = true;
+        BSM.SetTargetAliveBool(false);
 
         for (int i = 0; i < BSM.actionsToPerform.Count; i++)
         {

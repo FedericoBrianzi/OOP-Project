@@ -2,8 +2,6 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI;
-using TMPro;
 using Random = UnityEngine.Random;
 
 public class BattleStateMachine : MonoBehaviour
@@ -23,13 +21,16 @@ public class BattleStateMachine : MonoBehaviour
 
     private bool isTargetSelected = false;
     private bool isAttacking = false;
-    public bool targetDied = false;
+    private bool targetStillAlive = true;
     public enum BattleState
     {
         TEAMSELECTION,
         WAIT,
         SORTACTIONS,
-        PERFORMACTION
+        PERFORMACTION,
+        BATTLEWON,
+        BATTLELOST,
+        BATTLEENDED
     }
 
     private enum HeroStates
@@ -92,6 +93,14 @@ public class BattleStateMachine : MonoBehaviour
                 break;
 
             case BattleState.PERFORMACTION: ///performing every action
+                if(enemyTeam.Count == 0)
+                {
+                    battleState = BattleState.BATTLEWON;
+                }
+                if(playerTeam.Count == 0)
+                {
+                    battleState = BattleState.BATTLELOST;
+                }
                 if (actionsToPerform.Count > 0 && !isAttacking)
                 {
                     StartCoroutine(PerformAction());
@@ -102,6 +111,17 @@ public class BattleStateMachine : MonoBehaviour
                     uiHandler.HideActionDescription();
                     battleState = BattleState.WAIT;
                 }
+                break;
+            case BattleState.BATTLEWON:
+                GameManager.Instance.EndBattle(true);
+                battleState = BattleState.BATTLEENDED;
+                break;
+            case BattleState.BATTLELOST:
+                GameManager.Instance.EndBattle(false);
+                battleState = BattleState.BATTLEENDED;
+                break;
+            case BattleState.BATTLEENDED:
+                ///waiting state after battle
                 break;
         }
 
@@ -124,11 +144,6 @@ public class BattleStateMachine : MonoBehaviour
             case HeroStates.DONE:
                 break;
         }
-    }
-
-    public BaseClass GetHeroToManageClass()
-    {
-        return heroesToManage[0].GetComponent<BaseClass>();
     }
 
     #region Player HandleTurn Methods
@@ -158,16 +173,6 @@ public class BattleStateMachine : MonoBehaviour
     {                                            
         uiHandler.DeactivateTargetPanel();   
         heroAction.attackTargets.Add(target);   
-        heroesToManage[0].GetComponent<BaseClass>().indicator.SetActive(false);
-        actionsToPerform.Add(heroAction);
-        heroesToManage.RemoveAt(0);
-        heroInput = HeroStates.ACTIVATE;
-    }
-
-    public void MultiTargetInput(GameObject[] targets)
-    {
-        uiHandler.DeactivateTargetPanel();
-        heroAction.attackTargets.AddRange(targets);
         heroesToManage[0].GetComponent<BaseClass>().indicator.SetActive(false);
         actionsToPerform.Add(heroAction);
         heroesToManage.RemoveAt(0);
@@ -214,6 +219,25 @@ public class BattleStateMachine : MonoBehaviour
                 break;
         }
     }
+
+    public void ToPreviousAttackChoice()
+    {
+        uiHandler.DeactivateTargetPanel();
+        uiHandler.ActivateActionPanel(heroesToManage[0]);
+    }
+
+    public void ToPreviousTurn()
+    {
+        actionsToPerform.RemoveAt(actionsToPerform.Count - 1);
+        heroesToManage[0].GetComponent<BaseClass>().indicator.SetActive(false);
+
+        if (heroesToManage[0] == playerTeam[1]) heroesToManage.Insert(0, playerTeam[0]);
+        else heroesToManage.Insert(0, playerTeam[1]);
+
+        uiHandler.DeactivateActionPanel();
+        heroInput = HeroStates.ACTIVATE;
+    }
+
     #endregion
 
     #region Enemy HandleTurn Methods
@@ -230,12 +254,14 @@ public class BattleStateMachine : MonoBehaviour
         isAttacking = true;
         if (attackerClass.activeStatusEffects.Count == 0)
         {
+            StartCoroutine(AttackAnimation());
             yield return StartCoroutine(uiHandler.ShowActionDescription(actionsToPerform[0]));
             yield return StartCoroutine(PerformAttack());
             actionsToPerform.RemoveAt(0);
         }
         else yield return StartCoroutine(EvaluateStatusEffectBeforeAttack());
         uiHandler.UpdateBattleUI();
+
         if (actionsToPerform.Count == 0)
         {
             yield return StartCoroutine(EvaluateStatusEffectAfterAttack());
@@ -246,15 +272,52 @@ public class BattleStateMachine : MonoBehaviour
     private IEnumerator PerformAttack()
     {
         attackerClass.SubtractMana(actionsToPerform[0].attack.attackManaCost);
-        int damageTotal = CalculateDamage(actionsToPerform[0].attack.attackDamage, attackerClass.currentAttack);
+        int damageTotal = CalculateDamage(actionsToPerform[0].attack.attackDamage, attackerClass.GetCurrentAttack());
         while(actionsToPerform[0].attackTargets.Count != 0)
         {
+           // StartCoroutine(AttackAnimation());
             yield return StartCoroutine(actionsToPerform[0].attackTargets[0].GetComponent<BaseClass>().EvaluateAttack(actionsToPerform[0].attack, damageTotal, actionsToPerform[0].attackerGO));
-            if (!targetDied)
+            if (targetStillAlive)
             {
                 actionsToPerform[0].attackTargets.RemoveAt(0);
             }
-            else targetDied = true;
+            else targetStillAlive = true;
+        }
+    }
+
+    private IEnumerator AttackAnimation() //basic movement towards first target of the action
+    {
+        Vector3 startPos = actionsToPerform[0].attackerGO.transform.position;
+        Vector3 targetPos;
+        float timeToArrive = 1.75f;
+        float t = 0;
+
+        if (actionsToPerform[0].attackTargets[0].CompareTag("Player"))
+        {
+            targetPos = actionsToPerform[0].attackTargets[0].transform.position + new Vector3(2, 0, 0);
+        }
+        else targetPos = actionsToPerform[0].attackTargets[0].transform.position - new Vector3(2, 0, 0);
+
+        if (actionsToPerform[0].attack.attackType == BaseAttack.typeOfAttack.Defend)
+        {
+            yield break;
+        }
+
+        while (t < 1)
+        {
+            t += Time.deltaTime/timeToArrive;
+            actionsToPerform[0].attackerGO.transform.position = Vector3.Lerp(startPos, targetPos, t);
+            yield return new WaitForEndOfFrame();
+        }
+        yield return new WaitForSeconds(0.5f);
+        targetPos = startPos;
+        startPos = actionsToPerform[0].attackerGO.transform.position;
+        t = 0;
+        while (t < 1)
+        {
+            t += Time.deltaTime / timeToArrive;
+            actionsToPerform[0].attackerGO.transform.position = Vector3.Lerp(startPos, targetPos, t);
+            yield return new WaitForEndOfFrame();
         }
     }
 
@@ -347,7 +410,6 @@ public class BattleStateMachine : MonoBehaviour
             }
         }
         yield return StartCoroutine(uiHandler.ShowActionDescription(actionsToPerform[0]));
-        //qui andrebbe una coroutine per far muovere l'attaccante verso il target
         yield return StartCoroutine(PerformAttack()); ///once all status effects have been evaluated if it did not stop the attack, it performs.
         actionsToPerform.RemoveAt(0);
     }
@@ -422,7 +484,7 @@ public class BattleStateMachine : MonoBehaviour
 
     private int CalculateDamage(int atkDmg, int unitAtk)
     {
-        return atkDmg + unitAtk; //da tweakare(?)
+        return atkDmg + unitAtk; //should be probably tweaked
     }
 
     public void SetNewTarget(HandleTurn action)
@@ -440,8 +502,33 @@ public class BattleStateMachine : MonoBehaviour
                     break;
             }
         }
-        else action.attackerGO.GetComponent<EnemyStateMachine>().SelectTarget(action, action.attack);
-        
+        else
+        {
+            switch (action.attack.numberOfTargets)
+            {
+                case BaseAttack.typeOfTarget.SingleAllyTarget:
+                    action.attackTargets.Add(action.attackerGO);
+                    break;
+
+                case BaseAttack.typeOfTarget.SingleEnemyTarget:
+                    action.attackTargets.Add(playerTeam[Random.Range(0, playerTeam.Count)]);
+                    break;
+            }
+        }
     }
+    #endregion
+
+    #region Accessibility
+
+    public BaseClass GetHeroToManageClass()
+    {
+        return heroesToManage[0].GetComponent<BaseClass>();
+    }
+
+    public void SetTargetAliveBool(bool isAlive)
+    {
+        targetStillAlive = isAlive;
+    }
+
     #endregion
 }

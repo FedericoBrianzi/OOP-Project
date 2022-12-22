@@ -7,28 +7,33 @@ public abstract class BaseClass : MonoBehaviour
 {
     [field: SerializeField] public string unitName { get; private set; }
     [field: SerializeField] public int maxHealth { get; private set; }
-    public int currentHealth { get; private set; }
+    private int currentHealth;
     [field: SerializeField] public int maxMana { get; private set; }
-    public int currentMana { get; private set; }
+    private int currentMana;
     [field: SerializeField] public int attack { get; private set; }
-    public int currentAttack { get; private set; }
+    private int currentAttack;
     [field: SerializeField] public int armor { get; private set; }
-    public int currentArmor { get; private set; }
+    private int currentArmor;
     [field: SerializeField] public int speed { get; private set; }
-    public int currentSpeed { get; private set; }
+    private int currentSpeed;
     [field: SerializeField] public int evasion { get; private set; }
-    public int currentEvasion { get; private set; }
+    private int currentEvasion;
     [field: SerializeField] public string description { get; private set; }
     [field: SerializeField] public List<BaseAttack> attacks { get; private set; } = new List<BaseAttack>();
     [field: SerializeField] public BaseAttack confusedAttack { get; private set; }
     [field: SerializeField] public GameObject provokerGO { get; private set; }
     [field: SerializeField] public GameObject indicator { get; private set; }
 
+    private int attackStatChange, armorStatChange, speedStatChange, evasionStatChange;
+    private int maxStatBuff = 30;
+    private int maxStatNerf = -30;
+
     private HandleUI uiHandler;
 
     protected bool isDefending = false;
 
     private bool dodgedTheAttack = false;
+    private bool isAlive = true;
     public enum StatusEffect
     {
         Burned,
@@ -77,7 +82,7 @@ public abstract class BaseClass : MonoBehaviour
                 break;
             case BaseAttack.typeOfAttack.DmgAndStatChange:
                 yield return StartCoroutine(TakeDamage(totalDamage, attack.ignoreArmor));
-                if (!dodgedTheAttack)
+                if (!dodgedTheAttack && isAlive)
                 {
                     yield return StartCoroutine(ChangeStat(attack.buffedStat, attack.nerfedStat, attack.statBuffQuantity, attack.statNerfQuantity));
                 }
@@ -87,7 +92,7 @@ public abstract class BaseClass : MonoBehaviour
                 break;
             case BaseAttack.typeOfAttack.DmgAndStatus:
                 yield return StartCoroutine(TakeDamage(totalDamage, attack.ignoreArmor));
-                if (!dodgedTheAttack)
+                if (!dodgedTheAttack && isAlive)
                 {
                     yield return StartCoroutine(ApplyStatusEffect(attack.statusChange, attack.statusSuccessRate, attacker));
                 }
@@ -111,40 +116,58 @@ public abstract class BaseClass : MonoBehaviour
             if (isDefending)
             {
                 damageTaken = damage / 2;
-                currentHealth -= damageTaken;
+                if(damageTaken <= 0)
+                {
+                    damageTaken = 0;
+                }
                 yield return StartCoroutine(uiHandler.ShowDamageTakenDescription(damageTaken));
-                if (currentHealth < 0)
+                currentHealth -= damageTaken;
+                if (currentHealth <= 0)
                 {
                     currentHealth = 0;
+                    uiHandler.UpdateBattleUI();
                     if (gameObject.CompareTag("Player"))
                     {
                         yield return StartCoroutine(GetComponent<PlayerStateMachine>().DeadPlayerRoutine());
+                        yield return StartCoroutine(uiHandler.ShowDeadUnitDescription(this));
                         GetComponent<PlayerStateMachine>().currentState = PlayerStateMachine.TurnState.DEAD;
+                        isAlive = false;
                     }
                     else
                     {
                         yield return StartCoroutine(GetComponent<EnemyStateMachine>().DeadEnemyRoutine());
+                        yield return StartCoroutine(uiHandler.ShowDeadUnitDescription(this));
                         GetComponent<EnemyStateMachine>().currentState = EnemyStateMachine.TurnState.DEAD;
+                        isAlive = false;
                     }
                 }
             }
             else
             {
                 damageTaken = damage;
-                currentHealth -= damageTaken;
+                if (damageTaken <= 0)
+                {
+                    damageTaken = 0;
+                }
                 yield return StartCoroutine(uiHandler.ShowDamageTakenDescription(damageTaken));
-                if (currentHealth < 0)
+                currentHealth -= damageTaken;
+                if (currentHealth <= 0)
                 {
                     currentHealth = 0;
+                    uiHandler.UpdateBattleUI();
                     if (gameObject.CompareTag("Player"))
                     {
                         yield return StartCoroutine(GetComponent<PlayerStateMachine>().DeadPlayerRoutine());
+                        yield return StartCoroutine(uiHandler.ShowDeadUnitDescription(this));
                         GetComponent<PlayerStateMachine>().currentState = PlayerStateMachine.TurnState.DEAD;
+                        isAlive = false;
                     }
                     else
                     {
                         yield return StartCoroutine(GetComponent<EnemyStateMachine>().DeadEnemyRoutine());
+                        yield return StartCoroutine(uiHandler.ShowDeadUnitDescription(this));
                         GetComponent<EnemyStateMachine>().currentState = EnemyStateMachine.TurnState.DEAD;
+                        isAlive = false;
                     }
                 }
             }
@@ -154,20 +177,29 @@ public abstract class BaseClass : MonoBehaviour
             if (isDefending) 
             {
                 damageTaken = (damage - currentArmor) / 2;
-                currentHealth -= damageTaken;
+                if (damageTaken <= 0)
+                {
+                    damageTaken = 0;
+                }
                 yield return StartCoroutine(uiHandler.ShowDamageTakenDescription(damageTaken));
-                if (currentHealth < 0)
+                currentHealth -= damageTaken;
+                if (currentHealth <= 0)
                 {
                     currentHealth = 0;
+                    uiHandler.UpdateBattleUI();
                     if (gameObject.CompareTag("Player"))
                     {
                         yield return StartCoroutine(GetComponent<PlayerStateMachine>().DeadPlayerRoutine());
+                        yield return StartCoroutine(uiHandler.ShowDeadUnitDescription(this));
                         GetComponent<PlayerStateMachine>().currentState = PlayerStateMachine.TurnState.DEAD;
+                        isAlive = false;
                     }
                     else
                     {
                         yield return StartCoroutine(GetComponent<EnemyStateMachine>().DeadEnemyRoutine());
+                        yield return StartCoroutine(uiHandler.ShowDeadUnitDescription(this));
                         GetComponent<EnemyStateMachine>().currentState = EnemyStateMachine.TurnState.DEAD;
+                        isAlive = false;
                     } 
                        
                 }
@@ -175,54 +207,98 @@ public abstract class BaseClass : MonoBehaviour
             else
             {
                 damageTaken = (damage - currentArmor);
-                currentHealth -= damageTaken;
+                if (damageTaken <= 0)
+                {
+                    damageTaken = 0;
+                }
                 yield return StartCoroutine(uiHandler.ShowDamageTakenDescription(damageTaken));
-                if (currentHealth < 0)
+                currentHealth -= damageTaken;
+                if (currentHealth <= 0)
                 {
                     currentHealth = 0;
+                    uiHandler.UpdateBattleUI();
                     if (gameObject.CompareTag("Player"))
                     {
                         yield return StartCoroutine(GetComponent<PlayerStateMachine>().DeadPlayerRoutine());
+                        yield return StartCoroutine(uiHandler.ShowDeadUnitDescription(this));
                         GetComponent<PlayerStateMachine>().currentState = PlayerStateMachine.TurnState.DEAD;
+                        isAlive = false;
                     }
                     else
                     {
                         yield return StartCoroutine(GetComponent<EnemyStateMachine>().DeadEnemyRoutine());
+                        yield return StartCoroutine(uiHandler.ShowDeadUnitDescription(this));
                         GetComponent<EnemyStateMachine>().currentState = EnemyStateMachine.TurnState.DEAD;
+                        isAlive = false;
                     }
                 }
             }   
         }
-        
     }
 
     public virtual IEnumerator ChangeStat(BaseAttack.modifiedStat statToBuff, BaseAttack.modifiedStat statToNerf, int buff, int nerf)
     {
         switch (statToBuff)
         {
-            //case BaseAttack.modifiedStat.Health:  ///idk any spell that removes currentHealth but its not a damaging attack
-            //    currentHealth += buff;
-            //    yield return StartCoroutine(uiHandler.ShowStatChangeDescription(BaseAttack.modifiedStat.Health, buff, true));
-            //    break;
-            case BaseAttack.modifiedStat.Mana:
-                currentMana += buff;
-                yield return StartCoroutine(uiHandler.ShowStatChangeDescription(BaseAttack.modifiedStat.Mana, buff, true));
-                break;
             case BaseAttack.modifiedStat.Attack:
-                currentAttack += buff;
-                yield return StartCoroutine(uiHandler.ShowStatChangeDescription(BaseAttack.modifiedStat.Attack, buff, true));
+                attackStatChange += buff;
+                if(attackStatChange <= maxStatBuff)
+                {
+                    currentAttack = attack + attackStatChange;
+                    yield return StartCoroutine(uiHandler.ShowStatChangeDescription(BaseAttack.modifiedStat.Attack, buff, true));
+                }
+                else
+                {
+                    attackStatChange = attack + maxStatBuff - currentAttack;
+                    currentAttack += attackStatChange;
+                    yield return StartCoroutine(uiHandler.ShowStatChangeDescription(BaseAttack.modifiedStat.Attack, attackStatChange, true));
+                    attackStatChange = maxStatBuff;
+                }
                 break;
             case BaseAttack.modifiedStat.Armor:
-                currentArmor += buff;
-                yield return StartCoroutine(uiHandler.ShowStatChangeDescription(BaseAttack.modifiedStat.Armor, buff, true));
+                armorStatChange += buff;
+                if (armorStatChange <= maxStatBuff)
+                {
+                    currentArmor = armor + armorStatChange;
+                    yield return StartCoroutine(uiHandler.ShowStatChangeDescription(BaseAttack.modifiedStat.Armor, buff, true));
+                }
+                else
+                {
+                    armorStatChange = armor + maxStatBuff - currentArmor;
+                    currentArmor += armorStatChange;
+                    yield return StartCoroutine(uiHandler.ShowStatChangeDescription(BaseAttack.modifiedStat.Armor, armorStatChange, true));
+                    armorStatChange = maxStatBuff;
+                }
                 break;
             case BaseAttack.modifiedStat.Speed:
-                currentSpeed += buff;
-                yield return StartCoroutine(uiHandler.ShowStatChangeDescription(BaseAttack.modifiedStat.Speed, buff, true));
+                speedStatChange += buff;
+                if (speedStatChange <= maxStatBuff)
+                {
+                    currentSpeed = speed + speedStatChange;
+                    yield return StartCoroutine(uiHandler.ShowStatChangeDescription(BaseAttack.modifiedStat.Armor, buff, true));
+                }
+                else
+                {
+                    speedStatChange = speed + maxStatBuff - currentSpeed;
+                    currentSpeed += speedStatChange;
+                    yield return StartCoroutine(uiHandler.ShowStatChangeDescription(BaseAttack.modifiedStat.Armor, speedStatChange, true));
+                    speedStatChange = maxStatBuff;
+                }
                 break;
             case BaseAttack.modifiedStat.Evasion:
-                currentEvasion += buff;
-                yield return StartCoroutine(uiHandler.ShowStatChangeDescription(BaseAttack.modifiedStat.Evasion, buff, true));
+                evasionStatChange += buff;
+                if(evasionStatChange <= maxStatBuff)
+                {
+                    currentEvasion = evasion + evasionStatChange;
+                    yield return StartCoroutine(uiHandler.ShowStatChangeDescription(BaseAttack.modifiedStat.Evasion, buff, true));
+                }
+                else
+                {
+                    evasionStatChange = evasion + maxStatBuff - currentEvasion;
+                    currentEvasion += evasionStatChange;
+                    yield return StartCoroutine(uiHandler.ShowStatChangeDescription(BaseAttack.modifiedStat.Evasion, evasionStatChange, true));
+                    evasionStatChange = maxStatBuff;
+                }
                 break;
             case BaseAttack.modifiedStat.NONE:
                 break;
@@ -230,49 +306,65 @@ public abstract class BaseClass : MonoBehaviour
 
         switch (statToNerf)
         {
-            //case BaseAttack.modifiedStat.Health:  
-            //    currentHealth -= nerf;
-            //    yield return StartCoroutine(uiHandler.ShowStatChangeDescription(BaseAttack.modifiedStat.Health, nerf, false));
-            //    break;
-            case BaseAttack.modifiedStat.Mana:
-                currentMana -= nerf;
-                if (currentMana < 0)
-                {
-                    currentMana = 0;
-                }
-                yield return StartCoroutine(uiHandler.ShowStatChangeDescription(BaseAttack.modifiedStat.Mana, nerf, false));
-                break;
             case BaseAttack.modifiedStat.Attack:
-                currentAttack -= nerf;
-                if (currentAttack < 0)
+                attackStatChange -= nerf;
+                if (attackStatChange >= maxStatNerf)
                 {
-                    currentAttack = 0;
+                    currentAttack = attack + attackStatChange;
+                    yield return StartCoroutine(uiHandler.ShowStatChangeDescription(BaseAttack.modifiedStat.Attack, nerf, false));
                 }
-                yield return StartCoroutine(uiHandler.ShowStatChangeDescription(BaseAttack.modifiedStat.Attack, nerf, false));
+                else
+                {
+                    attackStatChange = attack + maxStatNerf - currentAttack;
+                    currentAttack += attackStatChange;
+                    yield return StartCoroutine(uiHandler.ShowStatChangeDescription(BaseAttack.modifiedStat.Attack, Mathf.Abs(attackStatChange), false));
+                    attackStatChange = maxStatNerf;
+                }
                 break;
             case BaseAttack.modifiedStat.Armor:
-                currentArmor -= nerf;
-                if (currentArmor < 0)
+                armorStatChange -= nerf;
+                if (armorStatChange >= maxStatNerf)
                 {
-                    currentArmor = 0;
+                    currentArmor = armor + armorStatChange;
+                    yield return StartCoroutine(uiHandler.ShowStatChangeDescription(BaseAttack.modifiedStat.Armor, nerf, false));
                 }
-                yield return StartCoroutine(uiHandler.ShowStatChangeDescription(BaseAttack.modifiedStat.Armor, nerf, false));
+                else
+                {
+                    armorStatChange = armor + maxStatNerf - currentArmor;
+                    currentArmor += armorStatChange;
+                    yield return StartCoroutine(uiHandler.ShowStatChangeDescription(BaseAttack.modifiedStat.Armor, Mathf.Abs(armorStatChange), false));
+                    armorStatChange = maxStatNerf;
+                }
                 break;
             case BaseAttack.modifiedStat.Speed:
-                currentSpeed -= nerf;
-                if (currentSpeed < 0)
+                speedStatChange -= nerf;
+                if (speedStatChange >= maxStatNerf)
                 {
-                    currentSpeed = 0;
+                    currentSpeed = speed + speedStatChange;
+                    yield return StartCoroutine(uiHandler.ShowStatChangeDescription(BaseAttack.modifiedStat.Armor, nerf, false));
                 }
-                yield return StartCoroutine(uiHandler.ShowStatChangeDescription(BaseAttack.modifiedStat.Speed, nerf, false));
+                else
+                {
+                    speedStatChange = speed + maxStatNerf - currentSpeed;
+                    currentSpeed += speedStatChange;
+                    yield return StartCoroutine(uiHandler.ShowStatChangeDescription(BaseAttack.modifiedStat.Armor, Mathf.Abs(speedStatChange), false));
+                    speedStatChange = maxStatNerf;
+                }
                 break;
             case BaseAttack.modifiedStat.Evasion:
-                currentEvasion -= nerf;
-                if (currentEvasion < 0)
+                evasionStatChange -= nerf;
+                if (evasionStatChange >= maxStatNerf)
                 {
-                    currentEvasion = 0;
+                    currentEvasion = evasion + evasionStatChange;
+                    yield return StartCoroutine(uiHandler.ShowStatChangeDescription(BaseAttack.modifiedStat.Evasion, nerf, false));
                 }
-                yield return StartCoroutine(uiHandler.ShowStatChangeDescription(BaseAttack.modifiedStat.Evasion, nerf, false));
+                else
+                {
+                    evasionStatChange = evasion + maxStatNerf - currentEvasion;
+                    currentEvasion += evasionStatChange;
+                    yield return StartCoroutine(uiHandler.ShowStatChangeDescription(BaseAttack.modifiedStat.Evasion, Mathf.Abs(evasionStatChange), false));
+                    evasionStatChange = maxStatNerf;
+                }
                 break;
             case BaseAttack.modifiedStat.NONE:
                 break;
@@ -363,13 +455,81 @@ public abstract class BaseClass : MonoBehaviour
         switch (status)
         {
             case StatusEffect.Burned:
-                currentHealth -= Mathf.RoundToInt(maxHealth * 10 / 100);
                 yield return StartCoroutine(uiHandler.ShowStatusDamageDescription(StatusEffect.Burned, Mathf.RoundToInt(maxHealth * 10 / 100), this));
+                currentHealth -= Mathf.RoundToInt(maxHealth * 10 / 100);
+                if (currentHealth < 0)
+                {
+                    currentHealth = 0;
+                    uiHandler.UpdateBattleUI();
+                    if (gameObject.CompareTag("Player"))
+                    {
+                        yield return StartCoroutine(GetComponent<PlayerStateMachine>().DeadPlayerRoutine());
+                        GetComponent<PlayerStateMachine>().currentState = PlayerStateMachine.TurnState.DEAD;
+                        isAlive = false;
+                    }
+                    else
+                    {
+                        yield return StartCoroutine(GetComponent<EnemyStateMachine>().DeadEnemyRoutine());
+                        GetComponent<EnemyStateMachine>().currentState = EnemyStateMachine.TurnState.DEAD;
+                        isAlive = false;
+                    }
+                }
+                uiHandler.UpdateBattleUI();
                 break;
             case StatusEffect.Poisoned:
-                currentHealth -= Mathf.RoundToInt(maxHealth * 15 / 100);
                 yield return StartCoroutine(uiHandler.ShowStatusDamageDescription(StatusEffect.Poisoned, Mathf.RoundToInt(maxHealth * 15 / 100), this));
+                currentHealth -= Mathf.RoundToInt(maxHealth * 15 / 100);
+                if (currentHealth < 0)
+                {
+                    currentHealth = 0;
+                    uiHandler.UpdateBattleUI();
+                    if (gameObject.CompareTag("Player"))
+                    {
+                        yield return StartCoroutine(GetComponent<PlayerStateMachine>().DeadPlayerRoutine());
+                        GetComponent<PlayerStateMachine>().currentState = PlayerStateMachine.TurnState.DEAD;
+                        isAlive = false;
+                    }
+                    else
+                    {
+                        yield return StartCoroutine(GetComponent<EnemyStateMachine>().DeadEnemyRoutine());
+                        GetComponent<EnemyStateMachine>().currentState = EnemyStateMachine.TurnState.DEAD;
+                        isAlive = false;
+                    }
+                }
+                uiHandler.UpdateBattleUI();
                 break;
         }
     }
+
+    #region GetCurrentStatsMethods
+    public int GetCurrentHealth()
+    {
+        return currentHealth;
+    }
+
+    public int GetCurrentMana()
+    {
+        return currentMana;
+    }
+
+    public int GetCurrentAttack()
+    {
+        return currentAttack;
+    }
+
+    public int GetCurrentArmor()
+    {
+        return currentArmor;
+    }
+
+    public int GetCurrentSpeed()
+    {
+        return currentSpeed;
+    }
+
+    public int GetCurrentEvasion()
+    {
+        return currentEvasion;
+    }
+#endregion
 }

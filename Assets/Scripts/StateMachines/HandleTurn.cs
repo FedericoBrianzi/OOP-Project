@@ -14,6 +14,6 @@ public class HandleTurn : IComparable<HandleTurn>
 
     public int CompareTo(HandleTurn other)
     {
-        return this.attackerGO.GetComponent<BaseClass>().currentSpeed.CompareTo(other.attackerGO.GetComponent<BaseClass>().currentSpeed);
+        return this.attackerGO.GetComponent<BaseClass>().GetCurrentSpeed().CompareTo(other.attackerGO.GetComponent<BaseClass>().GetCurrentSpeed());
     }
 }

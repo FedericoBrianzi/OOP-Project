@@ -105,7 +105,7 @@ public class EnemyStateMachine : MonoBehaviour
         List<BaseAttack> usableAttacks = new List<BaseAttack>();
         foreach(BaseAttack attack in attacksToCheck)
         {
-            if (attack.attackManaCost <= myClass.currentMana) usableAttacks.Add(attack);
+            if (attack.attackManaCost <= myClass.GetCurrentMana()) usableAttacks.Add(attack);
         }
         return usableAttacks;
     }
@@ -141,7 +141,7 @@ public class EnemyStateMachine : MonoBehaviour
         gameObject.tag = "DeadEnemy";
 
         BSM.enemyTeam.Remove(gameObject);
-        BSM.targetDied = true;
+        BSM.SetTargetAliveBool(false);
 
         for (int i = 0; i < BSM.actionsToPerform.Count; i++)
         {
@@ -157,7 +157,7 @@ public class EnemyStateMachine : MonoBehaviour
             if (BSM.actionsToPerform[i].attackTargets.Contains(gameObject))
             {
                 BSM.actionsToPerform[i].attackTargets.Remove(gameObject);
-                BSM.SetNewTarget(BSM.actionsToPerform[i]);
+                if (BSM.actionsToPerform[i] != BSM.actionsToPerform[0] && BSM.enemyTeam.Count > 0) BSM.SetNewTarget(BSM.actionsToPerform[i]);
             }
         }
 
@@ -170,7 +170,7 @@ public class EnemyStateMachine : MonoBehaviour
         }
 
         GetComponent<MeshRenderer>().material.color = Color.gray;
-        //potrei ruotarlo per farlo sembrare muerto
+        //Here i could rotate the dead unit to make it seems more dead
 
         isAlive = false;
 
