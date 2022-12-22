@@ -48,7 +48,7 @@ public class EnemyStateMachine : MonoBehaviour
             case TurnState.TEAMSELECTION:
                 break;
             case TurnState.CHOOSEACTION:
-                ChooseAction();
+                ChooseAction();     //ABSTRACTION
                 break;
             case TurnState.WAITING:
                 if(BSM.actionsToPerform.Count == 0 && BSM.battleState == BattleStateMachine.BattleState.WAIT)

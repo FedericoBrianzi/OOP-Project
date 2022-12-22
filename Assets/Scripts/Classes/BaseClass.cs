@@ -5,8 +5,8 @@ using Random = UnityEngine.Random;
 
 public abstract class BaseClass : MonoBehaviour
 {
-    [field: SerializeField] public string unitName { get; private set; }
-    [field: SerializeField] public int maxHealth { get; private set; }
+    [field: SerializeField] public string unitName { get; private set; }    
+    [field: SerializeField] public int maxHealth { get; private set; }  
     private int currentHealth;
     [field: SerializeField] public int maxMana { get; private set; }
     private int currentMana;
@@ -505,7 +505,7 @@ public abstract class BaseClass : MonoBehaviour
     public int GetCurrentHealth()
     {
         return currentHealth;
-    }
+    }   //ENCAPSULATION
 
     public int GetCurrentMana()
     {

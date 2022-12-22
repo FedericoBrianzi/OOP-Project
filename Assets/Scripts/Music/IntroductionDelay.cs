@@ -9,12 +9,12 @@ public class IntroductionDelay : MonoBehaviour
 
     private void Start()
     {
-        if(source.enabled) StartCoroutine(Delay());
+        StartCoroutine(Delay());
     }
 
     IEnumerator Delay()
     {
         yield return new WaitForSeconds(delay);
-        source.Play();
+        if (source.enabled) source.Play();
     }
 }

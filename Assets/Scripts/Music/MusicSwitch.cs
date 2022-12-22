@@ -16,7 +16,7 @@ public class MusicSwitch : MonoBehaviour
 
     private void Start()
     {
-        if (PlayerPrefs.GetInt("firstTimeAppOpens", 0) == 0)
+        if (PlayerPrefs.GetInt("firstTimeAppOpens", 0) == 1)
         {
             voiceSource.enabled = false;
         }

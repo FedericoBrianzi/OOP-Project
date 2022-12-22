@@ -336,7 +336,7 @@ public class HandleUI : MonoBehaviour
         actionText.text = GetFullNameFromBase(BSM.actionsToPerform[0].attackTargets[0].GetComponent<BaseClass>()) + " takes " + damageTaken + " damage.";
         UpdateBattleUI();
         yield return new WaitForSeconds(2);
-    }
+    }   //POLYMORPHISM
 
     public IEnumerator ShowDamageTakenDescription(bool dodged)
     {
@@ -344,7 +344,7 @@ public class HandleUI : MonoBehaviour
         if(dodged) actionText.text = GetFullNameFromBase(BSM.actionsToPerform[0].attackTargets[0].GetComponent<BaseClass>()) + " dodges the attack."; ///the bool check is not required
         UpdateBattleUI();
         yield return new WaitForSeconds(2);
-    }   ///dodge
+    }   ///dodge    //POLYMORPHISM
 
     public IEnumerator ShowStatusDamageDescription(BaseClass.StatusEffect status, int damage, BaseClass unitClass)
     {
@@ -452,14 +452,14 @@ public class HandleUI : MonoBehaviour
                 yield return new WaitForSeconds(2);
                 break;
         }
-    }
+    }   //POLYMORPHISM
 
     public IEnumerator ShowStatusTakenDescription(BaseClass.StatusEffect status, GameObject provoker)
     {
         actionDescriptionPanel.SetActive(true);
         actionText.text = GetFullNameFromBase(BSM.actionsToPerform[0].attackTargets[0].GetComponent<BaseClass>()) + " is provoked by " + GetFullNameFromBase(provoker.GetComponent<BaseClass>()) + ".";
         yield return new WaitForSeconds(2);
-    }   ///only for provoke
+    }   ///only for provoke //POLYMORPHISM
 
     public IEnumerator ShowStatusRemovedDescription(BaseClass.StatusEffect status)
     {

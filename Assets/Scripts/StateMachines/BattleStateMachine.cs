@@ -81,14 +81,7 @@ public class BattleStateMachine : MonoBehaviour
             case BattleState.SORTACTIONS:
                 actionsToPerform.Sort();    ///implemented an iComparable interface to sort the list of HandleTurns by the currentSpeed of the performer of the action
                 actionsToPerform.Reverse();
-                for(int i = 0; i < actionsToPerform.Count; i++)
-                {
-                    if(actionsToPerform[i].attack.attackType == BaseAttack.typeOfAttack.Defend) ///Defend actions are always first
-                    {
-                        actionsToPerform.Insert(0, actionsToPerform[i]);
-                        actionsToPerform.RemoveAt(i + 1);
-                    }
-                }
+                DefendActionFirst();            //ABSTRACTION
                 battleState = BattleState.PERFORMACTION;
                 break;
 
@@ -103,12 +96,12 @@ public class BattleStateMachine : MonoBehaviour
                 }
                 if (actionsToPerform.Count > 0 && !isAttacking)
                 {
-                    StartCoroutine(PerformAction());
+                    StartCoroutine(PerformAction());    
                 }
                 else if (actionsToPerform.Count > 0 && isAttacking) return;
                 else if (actionsToPerform.Count == 0 && !isAttacking)
                 {
-                    uiHandler.HideActionDescription();
+                    uiHandler.HideActionDescription();  //ABSTRACTION
                     battleState = BattleState.WAIT;
                 }
                 break;
@@ -143,6 +136,18 @@ public class BattleStateMachine : MonoBehaviour
                 break;
             case HeroStates.DONE:
                 break;
+        }
+    }
+
+    private void DefendActionFirst()
+    {
+        for (int i = 0; i < actionsToPerform.Count; i++)
+        {
+            if (actionsToPerform[i].attack.attackType == BaseAttack.typeOfAttack.Defend) ///Defend actions are always first
+            {
+                actionsToPerform.Insert(0, actionsToPerform[i]);
+                actionsToPerform.RemoveAt(i + 1);
+            }
         }
     }
 
