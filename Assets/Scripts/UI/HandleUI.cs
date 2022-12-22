@@ -132,7 +132,7 @@ public class HandleUI : MonoBehaviour
             UpdateBattleUI();
         }
 
-        battleEndPanel.SetActive(state == GameManager.GameState.BattleWon || state == GameManager.GameState.BattleWon);
+        battleEndPanel.SetActive(state == GameManager.GameState.BattleWon || state == GameManager.GameState.BattleLost);
         wonBattleText.SetActive(state == GameManager.GameState.BattleWon);
         lostBattleText.SetActive(state == GameManager.GameState.BattleLost);
     }

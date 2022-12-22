@@ -9,7 +9,7 @@ public class IntroductionDelay : MonoBehaviour
 
     private void Start()
     {
-        StartCoroutine(Delay());
+        if(source.enabled) StartCoroutine(Delay());
     }
 
     IEnumerator Delay()

@@ -254,7 +254,7 @@ public class BattleStateMachine : MonoBehaviour
         isAttacking = true;
         if (attackerClass.activeStatusEffects.Count == 0)
         {
-            StartCoroutine(AttackAnimation());
+            //StartCoroutine(AttackAnimation());
             yield return StartCoroutine(uiHandler.ShowActionDescription(actionsToPerform[0]));
             yield return StartCoroutine(PerformAttack());
             actionsToPerform.RemoveAt(0);
