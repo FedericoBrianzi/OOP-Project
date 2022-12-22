@@ -275,13 +275,13 @@ public abstract class BaseClass : MonoBehaviour
                 if (speedStatChange <= maxStatBuff)
                 {
                     currentSpeed = speed + speedStatChange;
-                    yield return StartCoroutine(uiHandler.ShowStatChangeDescription(BaseAttack.modifiedStat.Armor, buff, true));
+                    yield return StartCoroutine(uiHandler.ShowStatChangeDescription(BaseAttack.modifiedStat.Speed, buff, true));
                 }
                 else
                 {
                     speedStatChange = speed + maxStatBuff - currentSpeed;
                     currentSpeed += speedStatChange;
-                    yield return StartCoroutine(uiHandler.ShowStatChangeDescription(BaseAttack.modifiedStat.Armor, speedStatChange, true));
+                    yield return StartCoroutine(uiHandler.ShowStatChangeDescription(BaseAttack.modifiedStat.Speed, speedStatChange, true));
                     speedStatChange = maxStatBuff;
                 }
                 break;
@@ -341,13 +341,13 @@ public abstract class BaseClass : MonoBehaviour
                 if (speedStatChange >= maxStatNerf)
                 {
                     currentSpeed = speed + speedStatChange;
-                    yield return StartCoroutine(uiHandler.ShowStatChangeDescription(BaseAttack.modifiedStat.Armor, nerf, false));
+                    yield return StartCoroutine(uiHandler.ShowStatChangeDescription(BaseAttack.modifiedStat.Speed, nerf, false));
                 }
                 else
                 {
                     speedStatChange = speed + maxStatNerf - currentSpeed;
                     currentSpeed += speedStatChange;
-                    yield return StartCoroutine(uiHandler.ShowStatChangeDescription(BaseAttack.modifiedStat.Armor, Mathf.Abs(speedStatChange), false));
+                    yield return StartCoroutine(uiHandler.ShowStatChangeDescription(BaseAttack.modifiedStat.Speed, Mathf.Abs(speedStatChange), false));
                     speedStatChange = maxStatNerf;
                 }
                 break;
@@ -510,26 +510,26 @@ public abstract class BaseClass : MonoBehaviour
     public int GetCurrentMana()
     {
         return currentMana;
-    }
+    }    //ENCAPSULATION
 
     public int GetCurrentAttack()
     {
         return currentAttack;
-    }
+    }    //ENCAPSULATION
 
     public int GetCurrentArmor()
     {
         return currentArmor;
-    }
+    }    //ENCAPSULATION
 
     public int GetCurrentSpeed()
     {
         return currentSpeed;
-    }
+    }    //ENCAPSULATION    
 
     public int GetCurrentEvasion()
     {
         return currentEvasion;
-    }
-#endregion
+    }    //ENCAPSULATION
+    #endregion
 }
